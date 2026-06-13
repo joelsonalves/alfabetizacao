@@ -1,0 +1,148 @@
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.lesson-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lesson-module {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.lesson-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.lesson-stats {
+  display: flex;
+  gap: 16px;
+  font-weight: 500;
+}
+
+.lesson-content {
+  text-align: center;
+  padding: 32px;
+}
+
+.lesson-target-area {
+  margin-bottom: 32px;
+}
+
+.lesson-image {
+  margin-bottom: 20px;
+}
+
+.lesson-emoji {
+  font-size: 5rem;
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.lesson-real-image {
+  max-width: 300px;
+  max-height: 200px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+}
+
+.lesson-target-display {
+  margin-bottom: 16px;
+}
+
+.target-char {
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  display: inline-block;
+  transition: var(--transition);
+}
+.target-char.target-done {
+  color: var(--color-success);
+  animation: pulse 0.5s ease;
+}
+
+.target-word {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.target-letter {
+  font-size: 3rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-bottom: 3px solid var(--border-color);
+  transition: var(--transition);
+  color: var(--text-muted);
+}
+.target-letter.typed {
+  color: var(--color-success);
+  border-bottom-color: var(--color-success);
+}
+.target-letter.current {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  animation: pulse 1s infinite;
+}
+
+.lesson-typed {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  min-height: 2rem;
+  margin-bottom: 8px;
+}
+.lesson-typed .hint {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.speech-btn {
+  margin-top: 12px;
+}
+
+.speech-result {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.lesson-result {
+  margin-top: 24px;
+  text-align: center;
+  padding: 32px;
+}
+.lesson-result h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.result-details {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.result-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.result-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}

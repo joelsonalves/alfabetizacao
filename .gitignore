@@ -1,0 +1,12 @@
+node_modules/
+.opencode/node_modules/
+__pycache__/
+*.pyc
+.env
+dist/
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+*.log
+postgres_data/

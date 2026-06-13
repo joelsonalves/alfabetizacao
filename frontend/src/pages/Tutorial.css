@@ -1,0 +1,70 @@
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.tutorial-card {
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  padding: 40px 32px;
+  animation: slideUp 0.4s ease;
+}
+
+.tutorial-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tutorial-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-color);
+  transition: var(--transition);
+}
+.tutorial-dot.active {
+  background: var(--color-primary);
+  transform: scale(1.3);
+}
+.tutorial-dot.done {
+  background: var(--color-success);
+}
+
+.tutorial-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: pulse 2s infinite;
+}
+
+.tutorial-title {
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+}
+
+.tutorial-text {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 1rem;
+  margin-bottom: 28px;
+}
+
+.tutorial-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.tutorial-step-info {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
