@@ -101,7 +101,10 @@
 - [x] 12.3 Implementar cache de imagens no backend
 - [x] 12.4 Implementar fallback para SVG/emoji quando sem conexão
 
-## 13. Integração e Testes
+## 14. Ajustes de Feedback
+
+- [ ] 14.1 Revisão de vogais: construir frase única em vez de setTimeout para não cortar fala
+- [ ] 14.2 Desabilitar botões Ouvir e Fale enquanto sistema estiver falando (isSpeaking)
 
 - [x] 13.1 Conectar frontend com backend (serviço API)
 - [x] 13.2 Testar fluxo completo: cadastro → login → progressão
