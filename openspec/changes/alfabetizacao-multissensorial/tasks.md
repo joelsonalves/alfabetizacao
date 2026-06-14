@@ -106,6 +106,7 @@
 - [ ] 14.1 Revisão de vogais: construir frase única em vez de setTimeout para não cortar fala
 - [ ] 14.2 Desabilitar botões Ouvir e Fale enquanto sistema estiver falando (isSpeaking)
 - [ ] 14.3 Unificar feedbacks de teclado e fala numa lista acima do VirtualKeyboard
+- [ ] 14.4 Remover marcação incorreta de lições anteriores como concluídas na navegação
 
 - [x] 13.1 Conectar frontend com backend (serviço API)
 - [x] 13.2 Testar fluxo completo: cadastro → login → progressão
