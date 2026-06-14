@@ -1,7 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './LevelUp.css'
 
 export default function LevelUp({ level, xp, onClose }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   return (
     <div className="levelup-overlay" onClick={onClose}>
       <div className="levelup-card slide-up" onClick={e => e.stopPropagation()}>

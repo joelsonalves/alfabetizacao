@@ -39,8 +39,16 @@ export default function Lesson() {
   const [moduleLessons, setModuleLessons] = useState([])
   const [moduleCompletedLessons, setModuleCompletedLessons] = useState(new Set())
 
-  const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported } = useSpeech()
+  const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported, isSpeaking } = useSpeech()
   const { isListening, supported: srSupported, startListening } = useSpeechRecognition()
+
+  const [feedbacks, setFeedbacks] = useState([])
+  const feedbackIdRef = useRef(0)
+
+  const addFeedback = useCallback((type, message) => {
+    const id = ++feedbackIdRef.current
+    setFeedbacks(prev => [...prev.slice(-9), { id, type, message }])
+  }, [])
 
   const lessonRef = useRef(lesson)
   lessonRef.current = lesson
@@ -52,7 +60,8 @@ export default function Lesson() {
     if (isLetterOrSyllable) {
       speakLetter(key)
     }
-  }, [ttsSupported, speakLetter])
+    addFeedback('keyboard', `Tecla: ${key}`)
+  }, [ttsSupported, speakLetter, addFeedback])
 
   const kb = useKeyboard({
     onKeyPress,
@@ -211,10 +220,12 @@ export default function Lesson() {
         if (isCorrect) {
           setHasSpoken(true)
           setSpeechScore(s => s + 5)
+          addFeedback('speech', `Falou: ${transcript} ✅`)
           if (ttsSupported) {
             speak(`Você falou ${transcript}. Parabéns!`)
           }
         } else {
+          addFeedback('speech', `Falou: ${transcript} ❌ (esperado: ${target})`)
           if (ttsSupported) {
             speak(`Você falou ${transcript}. Vamos tentar novamente!`)
           }
@@ -223,10 +234,12 @@ export default function Lesson() {
       (error) => {
         if (error === 'no-speech' || error === 'audio-capture') {
           setSpeechNoResult(true)
+          addFeedback('speech', 'Não entendi. Tente novamente.')
         }
       },
       () => {
         setSpeechNoResult(true)
+        addFeedback('speech', 'Não entendi. Tente novamente.')
       },
     )
   }
@@ -289,7 +302,7 @@ export default function Lesson() {
         <div className="lesson-nav">
           {moduleLessons.map((ll) => {
             const isCurrent = ll.id === lesson?.id
-            const isCompleted = moduleCompletedLessons.has(ll.id) || ll.sort_order < (lesson?.sort_order || 0)
+            const isCompleted = moduleCompletedLessons.has(ll.id)
             return (
               <button
                 key={ll.id}
@@ -373,15 +386,24 @@ export default function Lesson() {
                   onClick={() => {
                     setHasListened(true)
                     if (lesson.lesson_type === 'review') {
-                      lesson.target.split('').forEach((ch, i) => {
-                        setTimeout(() => speakLetterWithWord(ch), i * 1500)
-                      })
+                      const sentence = lesson.target.split('').map(ch => {
+                        const upper = ch.toUpperCase()
+                        const word = LETTER_WORDS[upper]
+                        if (word) {
+                          const capitalized = word.charAt(0).toUpperCase() + word.slice(1)
+                          return `${upper} de ${capitalized}`
+                        }
+                        return upper
+                      }).join('. ') + '.'
+                      speak(sentence)
                     } else if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
                       speakLetterWithWord(lesson.target)
                     } else {
                       speakWord(lesson.target)
                     }
                   }}
+                  disabled={isSpeaking}
+                  aria-label={`Ouvir pronúncia de ${lesson?.target || ''}`}
                 >
                   🔊 Ouvir
                 </button>
@@ -389,7 +411,8 @@ export default function Lesson() {
               <button
                 className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
                 onClick={handleSpeech}
-                disabled={isListening}
+                disabled={isListening || isSpeaking}
+                aria-label={`Falar ${lesson?.target || ''}`}
               >
                 🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
               </button>
@@ -411,6 +434,14 @@ export default function Lesson() {
               )}
             </div>
           )}
+        </div>
+
+        <div className="feedback-list" aria-live="polite" aria-relevant="additions">
+          {feedbacks.map(fb => (
+            <div key={fb.id} className={`feedback-item feedback-${fb.type}`}>
+              {fb.message}
+            </div>
+          ))}
         </div>
 
         <VirtualKeyboard

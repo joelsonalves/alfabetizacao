@@ -34,6 +34,7 @@ export default function VirtualKeyboard({ pressedKey, onKeyClick, disabled }) {
                 style={{ flex: isSpace ? 6 : 1 }}
                 onClick={() => onKeyClick(key)}
                 disabled={disabled}
+                aria-label={isSpace ? 'Espaço' : `Letra ${key}`}
               >
                 {isSpace ? '' : key}
               </button>

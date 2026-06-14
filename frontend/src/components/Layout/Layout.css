@@ -82,6 +82,21 @@
   background: rgba(217, 112, 107, 0.1);
 }
 
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 8px;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  z-index: 1000;
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 8px;
+}
+
 .main {
   flex: 1;
   max-width: 1100px;

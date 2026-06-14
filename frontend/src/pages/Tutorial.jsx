@@ -97,6 +97,14 @@ export default function Tutorial() {
     navigate('/dashboard')
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') handleSkip()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   if (!show) return null
 
   return (

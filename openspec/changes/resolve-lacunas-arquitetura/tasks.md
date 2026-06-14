@@ -52,13 +52,13 @@
 
 ## 6. Observabilidade
 
-- [ ] 6.1 Adicionar structlog ao requirements.txt e configurar no backend
-- [ ] 6.2 Configurar middleware FastAPI para logging estruturado de requests (request_id, method, path, duration, user_id)
-- [ ] 6.3 Configurar nível de log via variável de ambiente LOG_LEVEL
-- [ ] 6.4 Melhorar endpoint GET /api/health com verificação de: conexão DB, disco, uptime
-- [ ] 6.5 Retornar HTTP 503 se componente crítico (DB) estiver fora
-- [ ] 6.6 Criar endpoint GET /api/metrics com: total de usuários, lições completadas, conquistas, usuários ativos hoje
-- [ ] 6.7 Configurar healthcheck no docker-compose para o serviço backend
+- [x] 6.1 Adicionar structlog ao requirements.txt e configurar no backend
+- [x] 6.2 Configurar middleware FastAPI para logging estruturado de requests (request_id, method, path, duration, user_id)
+- [x] 6.3 Configurar nível de log via variável de ambiente LOG_LEVEL
+- [x] 6.4 Melhorar endpoint GET /api/health com verificação de: conexão DB, disco, uptime
+- [x] 6.5 Retornar HTTP 503 se componente crítico (DB) estiver fora
+- [x] 6.6 Criar endpoint GET /api/metrics com: total de usuários, lições completadas, conquistas, usuários ativos hoje
+- [x] 6.7 Configurar healthcheck no docker-compose para o serviço backend
 
 ## 7. Segurança JWT
 
@@ -75,18 +75,18 @@
 
 ## 8. Acessibilidade (a11y)
 
-- [ ] 8.1 Adicionar @axe-core/react ao frontend (devDependency)
-- [ ] 8.2 Integrar axe-core no App.jsx para auditoria em development mode
-- [ ] 8.3 Adicionar aria-labels nos botões da navegação (Início, Perfil, Ajuda, Sair, Tutorial)
-- [ ] 8.4 Adicionar aria-labels nos botões do teclado virtual (cada tecla com label descritiva)
-- [ ] 8.5 Adicionar aria-labels nos botões Ouvir e Fale nas lições
-- [ ] 8.6 Adicionar aria-live="polite" na área de feedback de lição (acertos/erros)
-- [ ] 8.7 Garantir contraste mínimo 4.5:1 para textos na paleta atual
-- [ ] 8.8 Garantir que todos os modais e overlays (tutorial, achievements) fecham com Escape
-- [ ] 8.9 Garantir foco visível (focus ring) em todos os elementos interativos
-- [ ] 8.10 Verificar ordem de tabulação na página Lesson e Dashboard
-- [ ] 8.11 Executar auditoria axe-core e corrigir violações críticas/sérias
-- [ ] 8.12 Adicionar ícone/skip-link "Pular para conteúdo principal"
+- [x] 8.1 Adicionar @axe-core/react ao frontend (devDependency)
+- [x] 8.2 Integrar axe-core no App.jsx para auditoria em development mode
+- [x] 8.3 Adicionar aria-labels nos botões da navegação (Início, Perfil, Ajuda, Sair, Tutorial)
+- [x] 8.4 Adicionar aria-labels nos botões do teclado virtual (cada tecla com label descritiva)
+- [x] 8.5 Adicionar aria-labels nos botões Ouvir e Fale nas lições
+- [x] 8.6 Adicionar aria-live="polite" na área de feedback de lição (acertos/erros)
+- [x] 8.7 Garantir contraste mínimo 4.5:1 para textos na paleta atual
+- [x] 8.8 Garantir que todos os modais e overlays (tutorial, achievements) fecham com Escape
+- [x] 8.9 Garantir foco visível (focus ring) em todos os elementos interativos
+- [x] 8.10 Verificar ordem de tabulação na página Lesson e Dashboard
+- [x] 8.11 Executar auditoria axe-core e corrigir violações críticas/sérias
+- [x] 8.12 Adicionar ícone/skip-link "Pular para conteúdo principal"
 
 ## 9. Melhoria da Qualidade dos Testes
 

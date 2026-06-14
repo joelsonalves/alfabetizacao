@@ -9,6 +9,12 @@ import Tutorial from './pages/Tutorial'
 import Profile from './pages/Profile'
 import { useAuth } from './hooks/useAuth'
 
+if (import.meta.env.DEV) {
+  import('@axe-core/react').then(axe => {
+    axe.default(React, 1000)
+  })
+}
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="loading">Carregando...</div>

@@ -14,13 +14,14 @@ export const LETTER_WORDS = {
   'F': 'fogo', 'G': 'gato', 'H': 'hospital', 'I': 'iguana', 'J': 'jacaré',
   'K': 'kiwi', 'L': 'limão', 'M': 'maçã', 'N': 'nota', 'O': 'olho',
   'P': 'pinguim', 'Q': 'queijo', 'R': 'rato', 'S': 'sol', 'T': 'tartaruga',
-  'U': 'unicórnio', 'V': 'vaca', 'W': 'lobo', 'X': 'xis', 'Y': 'ioiô', 'Z': 'zebra',
+  'U': 'unicórnio', 'V': 'vaca',   'W': 'waffle', 'X': 'xis', 'Y': 'ioiô', 'Z': 'zebra',
 }
 
 export function useSpeech() {
   const [voices, setVoices] = useState([])
   const [ptVoice, setPtVoice] = useState(null)
   const [supported, setSupported] = useState(true)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const utteranceRef = useRef(null)
   const onEndRef = useRef(null)
 
@@ -51,6 +52,7 @@ export function useSpeech() {
     if (!window.speechSynthesis || !ptVoice) return
 
     window.speechSynthesis.cancel()
+    setIsSpeaking(true)
 
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.voice = ptVoice
@@ -58,9 +60,11 @@ export function useSpeech() {
     utterance.rate = 0.9
     utterance.pitch = 1.0
 
-    if (onEnd) {
-      utterance.onend = onEnd
+    utterance.onend = () => {
+      setIsSpeaking(false)
+      if (onEnd) onEnd()
     }
+    utterance.onerror = () => setIsSpeaking(false)
 
     utteranceRef.current = utterance
     window.speechSynthesis.speak(utterance)
@@ -91,5 +95,5 @@ export function useSpeech() {
     }
   }, [speak])
 
-  return { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported, voices, ptVoice }
+  return { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported, isSpeaking, voices, ptVoice }
 }
