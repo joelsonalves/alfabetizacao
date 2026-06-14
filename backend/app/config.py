@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     jwt_expiry_hours: int = 24
     jwt_refresh_expiry_hours: int = 168
     cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    log_level: str = "INFO"
     unsplash_access_key: str = ""
 
     class Config:
