@@ -333,7 +333,7 @@ export default function Lesson() {
               <span className="checklist-desc">"{lesson.lesson_type === 'review'
                 ? lesson.target.split('').join(' ')
                 : lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
-                  ? `${lesson.target}. ${lesson.target} de ${LETTER_WORDS[lesson.target?.toUpperCase()] || ''}.`
+                  ? `${lesson.target} → de ${(LETTER_WORDS[lesson.target?.toUpperCase()] || lesson.target).replace(/^./, m => m.toUpperCase())}`
                   : lesson.target}"</span>
             </div>
             <div className={`checklist-item ${speechCorrect ? 'done' : ''}`}>

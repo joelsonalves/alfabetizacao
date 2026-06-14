@@ -62,6 +62,7 @@
 - [x] 8.5 Tocar som da palavra/frase ao completar
 - [x] 8.6 Implementar hook useSpeechRecognition para microfone
 - [x] 8.7 Melhorar speakLetterWithWord: formato "A → de Abelha." (seta + capitalização)
+- [x] 8.8 Corrigir TTS para não falar "→" como "seta" e sincronizar checklist com speakLetterWithWord
 
 ## 9. Frontend: Módulos de Aprendizado
 
