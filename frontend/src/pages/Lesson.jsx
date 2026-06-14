@@ -33,6 +33,11 @@ export default function Lesson() {
   const [levelUp, setLevelUp] = useState(null)
   const { user, setUser } = useAuth()
 
+  const [hasListened, setHasListened] = useState(false)
+  const [hasSpoken, setHasSpoken] = useState(false)
+  const [moduleLessons, setModuleLessons] = useState([])
+  const [moduleCompletedLessons, setModuleCompletedLessons] = useState(new Set())
+
   const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported } = useSpeech()
   const { isListening, supported: srSupported, startListening } = useSpeechRecognition()
 
@@ -56,8 +61,10 @@ export default function Lesson() {
 
   const prevTypedChars = useRef('')
 
+  const canComplete = kb.completed && (!srSupported || !ttsSupported || (hasListened && hasSpoken))
+
   useEffect(() => {
-    if (kb.completed && !lessonCompleted) {
+    if (canComplete && !lessonCompleted) {
       setLessonCompleted(true)
       const currentLesson = lessonRef.current
       const points = (POINTS[currentLesson?.lesson_type] || 10) + speechScore
@@ -84,7 +91,7 @@ export default function Lesson() {
         }).catch(console.error)
       }, 500)
     }
-  }, [kb.completed])
+  }, [canComplete])
 
   useEffect(() => {
     if (kb.typedChars && kb.typedChars !== prevTypedChars.current && !lessonCompleted) {
@@ -105,16 +112,30 @@ export default function Lesson() {
     setSpeechExpected('')
     setSpeechScore(0)
     setSpeechNoResult(false)
+    setHasListened(false)
+    setHasSpoken(false)
+    setModuleLessons([])
+    setModuleCompletedLessons(new Set())
     prevTypedChars.current = ''
 
     Promise.all([
       api.modules.getLesson(lessonId),
       api.modules.list(),
-    ]).then(([l, mods]) => {
+      api.progress.get(),
+    ]).then(([l, mods, progress]) => {
       setLesson(l)
       lessonRef.current = l
       const mod = mods.find(m => m.id === l.module_id)
       setModule(mod)
+
+      api.modules.lessons(l.module_id).then(setModuleLessons).catch(() => {})
+
+      const completedSet = new Set()
+      if (progress) {
+        const arr = Array.isArray(progress) ? progress : [progress]
+        arr.forEach(p => { if (p.completed) completedSet.add(p.lesson_id) })
+      }
+      setModuleCompletedLessons(completedSet)
 
       if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
         api.images.emoji(l.target).then(setImageData).catch(() => {})
@@ -172,6 +193,7 @@ export default function Lesson() {
         setSpeechExpected(target)
 
         if (isCorrect) {
+          setHasSpoken(true)
           setSpeechScore(s => s + 5)
           if (ttsSupported) {
             speak(`Você falou ${transcript}. Parabéns!`)
@@ -195,6 +217,9 @@ export default function Lesson() {
 
   const nextLesson = async () => {
     try {
+      if (lesson) {
+        setModuleCompletedLessons(prev => new Set(prev).add(lesson.id))
+      }
       const lessons = await api.modules.lessons(moduleId)
       const currentIdx = lessons.findIndex(l => l.id === lesson?.id)
       if (currentIdx < lessons.length - 1) {
@@ -206,6 +231,14 @@ export default function Lesson() {
       navigate('/dashboard')
     }
   }
+
+  const handleNavigateLesson = (targetId) => {
+    if (targetId !== lesson?.id) {
+      navigate(`/lesson/${moduleId}/${targetId}`)
+    }
+  }
+
+  const currentLessonIdx = moduleLessons.findIndex(l => l.id === lesson?.id)
 
   if (loading) return <div className="loading">Carregando...</div>
   if (!lesson) return <div className="loading">Lição não encontrada</div>
@@ -229,6 +262,24 @@ export default function Lesson() {
           {speechScore > 0 && <span>🎤 +{speechScore}</span>}
         </div>
       </div>
+
+      {moduleLessons.length > 1 && (
+        <div className="lesson-nav">
+          {moduleLessons.map((ll) => {
+            const isCurrent = ll.id === lesson?.id
+            const isCompleted = moduleCompletedLessons.has(ll.id) || ll.sort_order < (lesson?.sort_order || 0)
+            return (
+              <button
+                key={ll.id}
+                className={`lesson-nav-item ${isCurrent ? 'active' : ''}`}
+                onClick={() => handleNavigateLesson(ll.id)}
+              >
+                {isCompleted ? '✅' : ''} {ll.target}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       <div className="lesson-content card">
         <div className="lesson-target-area">
@@ -265,19 +316,33 @@ export default function Lesson() {
             {kb.typedChars || <span className="hint">Digite o que está na tela</span>}
           </div>
 
+          <div className="progress-checklist">
+            <div className={`checklist-item ${hasListened ? 'done' : ''}`}>
+              <span className="checklist-icon">{hasListened ? '✅' : '❌'}</span>
+              <span className="checklist-label">Ouvir</span>
+              <span className="checklist-desc">"{lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
+                ? `${lesson.target}. ${lesson.target} de ${LETTER_WORDS[lesson.target?.toUpperCase()] || ''}.`
+                : lesson.target}"</span>
+            </div>
+            <div className={`checklist-item ${speechCorrect ? 'done' : ''}`}>
+              <span className="checklist-icon">{speechCorrect ? '✅' : '❌'}</span>
+              <span className="checklist-label">Falar</span>
+              <span className="checklist-desc">Fale: {lesson.target}</span>
+            </div>
+            <div className={`checklist-item ${kb.typedChars?.length >= (lesson?.target?.length || 0) ? 'done' : ''}`}>
+              <span className="checklist-icon">{kb.typedChars?.length >= (lesson?.target?.length || 0) ? '✅' : '❌'}</span>
+              <span className="checklist-label">Teclar</span>
+              <span className="checklist-desc">Digite o que está na tela</span>
+            </div>
+          </div>
+
           {srSupported && (
             <div className="speech-actions">
-              <button
-                className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
-                onClick={handleSpeech}
-                disabled={isListening}
-              >
-                🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
-              </button>
               {ttsSupported && (
                 <button
                   className="btn btn-ghost listen-btn"
                   onClick={() => {
+                    setHasListened(true)
                     if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
                       speakLetterWithWord(lesson.target)
                     } else {
@@ -288,6 +353,13 @@ export default function Lesson() {
                   🔊 Ouvir
                 </button>
               )}
+              <button
+                className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
+                onClick={handleSpeech}
+                disabled={isListening}
+              >
+                🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
+              </button>
             </div>
           )}
           {speechNoResult && (

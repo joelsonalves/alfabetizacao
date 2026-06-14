@@ -147,6 +147,73 @@
   color: var(--color-accent);
 }
 
+.lesson-nav {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.lesson-nav-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-primary);
+  min-width: 42px;
+  text-align: center;
+}
+.lesson-nav-item:hover {
+  background: var(--bg-primary);
+  border-color: var(--color-primary);
+}
+.lesson-nav-item.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.progress-checklist {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 16px auto 4px;
+  max-width: 320px;
+  padding: 0 16px;
+}
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+.checklist-item.done {
+  color: var(--color-success);
+  font-weight: 500;
+}
+.checklist-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+.checklist-label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.checklist-desc {
+  font-size: 0.8rem;
+  color: inherit;
+  opacity: 0.8;
+}
+
 .lesson-result {
   margin-top: 24px;
   text-align: center;
