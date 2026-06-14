@@ -108,6 +108,7 @@
 - [ ] 14.3 Unificar feedbacks de teclado e fala numa lista acima do VirtualKeyboard
 - [ ] 14.4 Remover marcação incorreta de lições anteriores como concluídas na navegação
 - [ ] 14.5 Corrigir W de lobo → W de waffle (useSpeech.js + images.py)
+- [ ] 14.6 Adicionar símbolos no header: 🏠 Início, 👤 Perfil, ❓ Ajuda, 🔒 Sair
 
 - [x] 13.1 Conectar frontend com backend (serviço API)
 - [x] 13.2 Testar fluxo completo: cadastro → login → progressão
