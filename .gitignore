@@ -10,3 +10,8 @@ venv/
 .DS_Store
 *.log
 postgres_data/
+
+# Coverage and cache
+.coverage
+.pytest_cache/
+*.coverage
