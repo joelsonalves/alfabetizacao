@@ -62,16 +62,16 @@
 
 ## 7. Segurança JWT
 
-- [ ] 7.1 Criar migration Alembic para tabela `token_blocklist` (jti, token_type, user_id, created_at, expires_at)
-- [ ] 7.2 Atualizar modelo SQLAlchemy com tabela TokenBlocklist
-- [ ] 7.3 Modificar endpoint POST /api/auth/login para retornar access_token (15min) + refresh_token (7d)
-- [ ] 7.4 Criar endpoint POST /api/auth/refresh para renovar tokens
-- [ ] 7.5 Criar endpoint POST /api/auth/logout para invalidar refresh_token (adicionar à blocklist)
+- [x] 7.1 Criar migration Alembic para tabela `token_blocklist` (jti, token_type, user_id, created_at, expires_at)
+- [x] 7.2 Atualizar modelo SQLAlchemy com tabela TokenBlocklist
+- [x] 7.3 Modificar endpoint POST /api/auth/login para retornar access_token (15min) + refresh_token (7d)
+- [x] 7.4 Criar endpoint POST /api/auth/refresh para renovar tokens
+- [x] 7.5 Criar endpoint POST /api/auth/logout para invalidar refresh_token (adicionar à blocklist)
 - [ ] 7.6 Criar job agendado (ou middleware) para limpar blocklist de tokens expirados
-- [ ] 7.7 Atualizar middleware JWT para verificar blocklist
-- [ ] 7.8 No frontend, implementar axios interceptor para renovação silenciosa de token
-- [ ] 7.9 Atualizar AuthContext e useAuth para gerenciar refresh_token
-- [ ] 7.10 Tratar falha de refresh (redirecionar para login)
+- [x] 7.7 Atualizar middleware JWT para verificar blocklist
+- [x] 7.8 No frontend, implementar axios interceptor para renovação silenciosa de token
+- [x] 7.9 Atualizar AuthContext e useAuth para gerenciar refresh_token
+- [x] 7.10 Tratar falha de refresh (redirecionar para login)
 
 ## 8. Acessibilidade (a11y)
 
