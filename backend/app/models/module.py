@@ -19,7 +19,7 @@ class Lesson(Base):
     module_id = Column(Integer, ForeignKey("learning_modules.id"), nullable=False)
     name = Column(String(100), nullable=False)
     lesson_type = Column(String(50), nullable=False)
-    target = Column(String(10), nullable=False)
+    target = Column(String(100), nullable=False)
     content = Column(JSON, nullable=True)
     sort_order = Column(Integer, nullable=False)
 

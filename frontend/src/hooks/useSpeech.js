@@ -1,5 +1,14 @@
 import { useCallback, useRef, useEffect, useState } from 'react'
 
+export const LETTER_SOUNDS = {
+  'A': 'a', 'E': 'é', 'I': 'i', 'O': 'ó', 'U': 'u',
+  'B': 'bê', 'C': 'cê', 'D': 'dê', 'F': 'éfi', 'G': 'gê',
+  'H': 'agá', 'J': 'jóta', 'K': 'cá', 'L': 'éli', 'M': 'ême',
+  'N': 'êni', 'P': 'pê', 'Q': 'quê', 'R': 'érre', 'S': 'ésse',
+  'T': 'tê', 'V': 'vê', 'W': 'dábliu', 'X': 'xis', 'Y': 'ípsilon',
+  'Z': 'zê',
+}
+
 export function useSpeech() {
   const [voices, setVoices] = useState([])
   const [ptVoice, setPtVoice] = useState(null)
@@ -50,15 +59,7 @@ export function useSpeech() {
   }, [ptVoice])
 
   const speakLetter = useCallback((letter) => {
-    const letterSounds = {
-      'A': 'a', 'E': 'é', 'I': 'i', 'O': 'ó', 'U': 'u',
-      'B': 'bê', 'C': 'cê', 'D': 'dê', 'F': 'éfi', 'G': 'gê',
-      'H': 'agá', 'J': 'jóta', 'K': 'cá', 'L': 'éli', 'M': 'ême',
-      'N': 'êni', 'P': 'pê', 'Q': 'quê', 'R': 'érre', 'S': 'ésse',
-      'T': 'tê', 'V': 'vê', 'W': 'dábliu', 'X': 'xis', 'Y': 'ípsilon',
-      'Z': 'zê',
-    }
-    const sound = letterSounds[letter.toUpperCase()] || letter
+    const sound = LETTER_SOUNDS[letter.toUpperCase()] || letter
     speak(sound)
   }, [speak])
 

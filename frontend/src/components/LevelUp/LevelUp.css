@@ -1,0 +1,61 @@
+.levelup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.levelup-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.levelup-stars {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.levelup-star {
+  font-size: 2.5rem;
+  animation: starPop 0.4s ease forwards;
+  opacity: 0;
+}
+
+.levelup-title {
+  font-size: 1.5rem;
+  color: var(--color-accent);
+  margin-bottom: 12px;
+}
+
+.levelup-level {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.levelup-text {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.levelup-xp {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.levelup-btn {
+  min-width: 180px;
+}

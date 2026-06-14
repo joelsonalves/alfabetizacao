@@ -9,11 +9,11 @@ class UserProgress(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
-    score = Column(Integer, default=0)
-    stars = Column(Integer, default=0)
-    completed = Column(Boolean, default=False)
+    score = Column(Integer, default=0, server_default="0")
+    stars = Column(Integer, default=0, server_default="0")
+    completed = Column(Boolean, default=False, server_default="false")
     completed_at = Column(DateTime, nullable=True)
-    attempts = Column(Integer, default=0)
+    attempts = Column(Integer, default=0, server_default="0")
 
 
 class Achievement(Base):

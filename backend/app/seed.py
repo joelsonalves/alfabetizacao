@@ -139,6 +139,8 @@ def seed():
             {"name": "Sílaba ON", "lesson_type": "syllable", "target": "ON"},
             {"name": "Sílaba UN", "lesson_type": "syllable", "target": "UN"},
         ]
+        for i, s in enumerate(cvc_syllables):
+            s["sort_order"] = len(complex_syllables) + i + 1
         complex_syllables.extend(cvc_syllables)
         LEVELS[3]["lessons"] = complex_syllables
 

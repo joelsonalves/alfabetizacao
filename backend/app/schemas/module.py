@@ -44,6 +44,12 @@ class ProgressResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    @classmethod
+    def model_validate(cls, obj):
+        if hasattr(obj, "completed_at") and obj.completed_at is not None:
+            obj.completed_at = obj.completed_at.isoformat()
+        return super().model_validate(obj)
+
 
 class AchievementResponse(BaseModel):
     id: int
@@ -52,3 +58,9 @@ class AchievementResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def model_validate(cls, obj):
+        if hasattr(obj, "unlocked_at") and obj.unlocked_at is not None:
+            obj.unlocked_at = obj.unlocked_at.isoformat()
+        return super().model_validate(obj)

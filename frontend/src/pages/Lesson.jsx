@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { useSpeech } from '../hooks/useSpeech'
+import { useSpeech, LETTER_SOUNDS } from '../hooks/useSpeech'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useKeyboard } from '../hooks/useKeyboard'
+import { useAuth } from '../hooks/useAuth'
 import VirtualKeyboard from '../components/VirtualKeyboard/VirtualKeyboard'
+import LevelUp from '../components/LevelUp/LevelUp'
 import './Lesson.css'
 
 const POINTS = { letter: 10, syllable: 25, word: 50, phrase: 100, sentence: 100 }
@@ -19,6 +21,11 @@ export default function Lesson() {
   const [showResult, setShowResult] = useState(false)
   const [imageData, setImageData] = useState(null)
   const [speechResult, setSpeechResult] = useState('')
+  const [speechCorrect, setSpeechCorrect] = useState(null)
+  const [speechExpected, setSpeechExpected] = useState('')
+  const [speechScore, setSpeechScore] = useState(0)
+  const [levelUp, setLevelUp] = useState(null)
+  const { user, setUser } = useAuth()
 
   const { speakLetter, speakSyllable, speakWord, supported: ttsSupported } = useSpeech()
   const { isListening, supported: srSupported, startListening } = useSpeechRecognition()
@@ -56,12 +63,17 @@ export default function Lesson() {
       }
 
       setTimeout(() => {
+        const prevLevel = user?.level || 1
         api.progress.update(currentLesson.id, {
           score: points,
           stars,
           completed: true,
           attempts: 1,
-        }).then(() => {
+        }).then((data) => {
+          if (data.level > prevLevel) {
+            setLevelUp({ level: data.level, xp: data.xp })
+            if (setUser) setUser(u => u ? { ...u, level: data.level, xp: data.xp } : u)
+          }
           setShowResult(true)
         }).catch(console.error)
       }, 500)
@@ -83,6 +95,9 @@ export default function Lesson() {
     setShowResult(false)
     setImageData(null)
     setSpeechResult('')
+    setSpeechCorrect(null)
+    setSpeechExpected('')
+    setSpeechScore(0)
     prevTypedChars.current = ''
 
     Promise.all([
@@ -107,9 +122,35 @@ export default function Lesson() {
     startListening(
       (transcript) => {
         setSpeechResult(transcript)
-        const target = lesson?.target?.toUpperCase() || ''
-        if (transcript === target && ttsSupported) {
-          speakWord(lesson.target)
+        const currentLesson = lessonRef.current
+        if (!currentLesson) return
+
+        const target = currentLesson.target?.toUpperCase() || ''
+        const acceptedSounds = [target]
+
+        if (currentLesson.lesson_type === 'letter' || currentLesson.lesson_type === 'consonant') {
+          const sound = LETTER_SOUNDS[target]?.toUpperCase()
+          if (sound) acceptedSounds.push(sound)
+        }
+
+        const isCorrect = acceptedSounds.some(s => {
+          const normalizedTranscript = transcript.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          const normalizedSound = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          return normalizedTranscript === normalizedSound
+        })
+
+        setSpeechCorrect(isCorrect)
+        setSpeechExpected(target)
+
+        if (isCorrect) {
+          setSpeechScore(s => s + 5)
+          if (ttsSupported) {
+            if (currentLesson.lesson_type === 'letter') {
+              speakLetter(target)
+            } else {
+              speakWord(currentLesson.target)
+            }
+          }
         }
       },
       (error) => console.log('Speech error:', error),
@@ -147,8 +188,9 @@ export default function Lesson() {
           <span className="lesson-name">{lesson?.name}</span>
         </div>
         <div className="lesson-stats">
-          <span>⭐ {kb.score}pts</span>
+          <span>⭐ {kb.score + speechScore}pts</span>
           <span>❌ {kb.errors}</span>
+          {speechScore > 0 && <span>🎤 +{speechScore}</span>}
         </div>
       </div>
 
@@ -193,13 +235,15 @@ export default function Lesson() {
               onClick={handleSpeech}
               disabled={isListening}
             >
-              🎤 {isListening ? 'Ouvindo...' : 'Falar'}
+              🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
             </button>
           )}
           {speechResult && (
-            <div className="speech-result">
-              Você disse: <strong>{speechResult}</strong>
-              {speechResult === lesson?.target?.toUpperCase() ? ' ✅' : ' ❌'}
+            <div className={`speech-result ${speechCorrect ? 'speech-correct' : 'speech-incorrect'}`}>
+              {speechCorrect ? '✅' : '❌'} Você disse: <strong>{speechResult}</strong>
+              {!speechCorrect && (
+                <span className="speech-expected"> (esperado: {speechExpected})</span>
+              )}
             </div>
           )}
         </div>
@@ -230,6 +274,13 @@ export default function Lesson() {
             Próxima Lição →
           </button>
         </div>
+      )}
+      {levelUp && (
+        <LevelUp
+          level={levelUp.level}
+          xp={levelUp.xp}
+          onClose={() => setLevelUp(null)}
+        />
       )}
     </div>
   )

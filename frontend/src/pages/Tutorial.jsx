@@ -53,7 +53,7 @@ const STEPS = [
 export default function Tutorial() {
   const [step, setStep] = useState(0)
   const [show, setShow] = useState(true)
-  const { user, setUser } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const { speak, supported } = useSpeech()
 
@@ -64,6 +64,17 @@ export default function Tutorial() {
       speak(currentStep.text)
     }
   }, [step, supported, speak, currentStep])
+
+  useEffect(() => {
+    const targetClass = currentStep?.highlight
+    document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'))
+    if (targetClass) {
+      document.querySelectorAll(`.${targetClass}`).forEach(el => el.classList.add('tutorial-highlight'))
+    }
+    return () => {
+      document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'))
+    }
+  }, [step, currentStep])
 
   const handleNext = useCallback(() => {
     if (step < STEPS.length - 1) {

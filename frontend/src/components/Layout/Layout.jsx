@@ -1,11 +1,18 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import HelpButton from '../HelpButton/HelpButton'
 import './Layout.css'
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const helpContext = location.pathname.includes('/lesson') ? 'lesson' :
+    location.pathname.includes('/dashboard') ? 'dashboard' :
+    location.pathname.includes('/profile') ? 'profile' :
+    'default'
 
   const handleLogout = () => {
     logout()
@@ -37,6 +44,7 @@ export default function Layout({ children }) {
       <main className="main">
         {children}
       </main>
+      <HelpButton context={helpContext} />
     </div>
   )
 }

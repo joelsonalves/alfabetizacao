@@ -31,10 +31,11 @@ def update_progress(
     if not progress:
         progress = UserProgress(user_id=user.id, lesson_id=lesson_id)
         db.add(progress)
+        db.flush()
 
-    progress.score += data.score
-    progress.stars = max(progress.stars, data.stars)
-    progress.attempts += data.attempts
+    progress.score = (progress.score or 0) + data.score
+    progress.stars = max(progress.stars or 0, data.stars)
+    progress.attempts = (progress.attempts or 0) + data.attempts
     if data.completed and not progress.completed:
         progress.completed = True
         progress.completed_at = datetime.utcnow()

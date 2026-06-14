@@ -114,6 +114,17 @@
   font-size: 0.95rem;
   color: var(--text-secondary);
 }
+.speech-correct {
+  color: var(--color-success);
+  font-weight: 500;
+}
+.speech-incorrect {
+  color: var(--color-error);
+}
+.speech-expected {
+  color: var(--text-muted);
+  font-weight: 400;
+}
 
 .lesson-result {
   margin-top: 24px;
