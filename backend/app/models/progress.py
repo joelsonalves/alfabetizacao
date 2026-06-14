@@ -14,6 +14,7 @@ class UserProgress(Base):
     completed = Column(Boolean, default=False, server_default="false")
     completed_at = Column(DateTime, nullable=True)
     attempts = Column(Integer, default=0, server_default="0")
+    version = Column(Integer, default=0)
 
 
 class Achievement(Base):

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api } from '../services/api'
+import { api, updateProgressWithRetry } from '../services/api'
 import { useSpeech, LETTER_SOUNDS, LETTER_WORDS } from '../hooks/useSpeech'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useKeyboard } from '../hooks/useKeyboard'
@@ -31,6 +31,7 @@ export default function Lesson() {
   const [speechScore, setSpeechScore] = useState(0)
   const [speechNoResult, setSpeechNoResult] = useState(false)
   const [levelUp, setLevelUp] = useState(null)
+  const [retryError, setRetryError] = useState(null)
   const { user, setUser } = useAuth()
 
   const [hasListened, setHasListened] = useState(false)
@@ -77,18 +78,27 @@ export default function Lesson() {
 
       setTimeout(() => {
         const prevLevel = user?.level || 1
-        api.progress.update(currentLesson.id, {
+        updateProgressWithRetry(currentLesson.id, {
           score: points,
           stars,
           completed: true,
           attempts: 1,
         }).then((data) => {
+          if (data && data.__conflict) {
+            setRetryError('Não foi possível salvar o progresso. Tente novamente.')
+            setShowResult(true)
+            return
+          }
           if (data.level > prevLevel) {
             setLevelUp({ level: data.level, xp: data.xp })
             if (setUser) setUser(u => u ? { ...u, level: data.level, xp: data.xp } : u)
           }
+          setRetryError(null)
           setShowResult(true)
-        }).catch(console.error)
+        }).catch((err) => {
+          setRetryError('Erro ao salvar progresso. Tente novamente.')
+          setShowResult(true)
+        })
       }, 500)
     }
   }, [canComplete])
@@ -116,6 +126,7 @@ export default function Lesson() {
     setHasSpoken(false)
     setModuleLessons([])
     setModuleCompletedLessons(new Set())
+    setRetryError(null)
     prevTypedChars.current = ''
 
     Promise.all([
@@ -267,6 +278,12 @@ export default function Lesson() {
           {speechScore > 0 && <span>🎤 +{speechScore}</span>}
         </div>
       </div>
+
+      {retryError && (
+        <div className="notification notification-error" onClick={() => setRetryError(null)}>
+          ⚠️ {retryError}
+        </div>
+      )}
 
       {moduleLessons.length > 1 && (
         <div className="lesson-nav">

@@ -33,13 +33,13 @@
 
 ## 4. Controle de Concorrência
 
-- [ ] 4.1 Criar migration Alembic para adicionar coluna `version` à tabela `user_progress`
-- [ ] 4.2 Atualizar modelo SQLAlchemy UserProgress com campo version (Integer, default 0)
-- [ ] 4.3 Implementar optimistic locking no endpoint POST /api/progress/lesson/{id} (verificar version, incrementar)
-- [ ] 4.4 Implementar retorno HTTP 409 com dados atuais quando version diverge
-- [ ] 4.5 No frontend, implementar interceptor/tratamento para 409 no progresso
-- [ ] 4.6 Implementar retry automático (1 tentativa) no frontend ao receber 409
-- [ ] 4.7 Exibir notificação não-bloqueante se retry falhar
+- [x] 4.1 Criar migration Alembic para adicionar coluna `version` à tabela `user_progress`
+- [x] 4.2 Atualizar modelo SQLAlchemy UserProgress com campo version (Integer, default 0)
+- [x] 4.3 Implementar optimistic locking no endpoint POST /api/progress/lesson/{id} (verificar version, incrementar)
+- [x] 4.4 Implementar retorno HTTP 409 com dados atuais quando version diverge
+- [x] 4.5 No frontend, implementar interceptor/tratamento para 409 no progresso
+- [x] 4.6 Implementar retry automático (1 tentativa) no frontend ao receber 409
+- [x] 4.7 Exibir notificação não-bloqueante se retry falhar
 
 ## 5. Migração de Dados
 

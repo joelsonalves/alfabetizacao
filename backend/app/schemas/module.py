@@ -31,6 +31,7 @@ class ProgressUpdate(BaseModel):
     stars: int
     completed: bool
     attempts: int
+    version: int | None = None
 
 
 class ProgressResponse(BaseModel):
@@ -40,6 +41,7 @@ class ProgressResponse(BaseModel):
     stars: int
     completed: bool
     completed_at: str | None
+    version: int = 0
 
     class Config:
         from_attributes = True
