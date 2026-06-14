@@ -125,6 +125,11 @@
   color: var(--text-muted);
   font-weight: 400;
 }
+.speech-suggestion {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
 
 .lesson-result {
   margin-top: 24px;

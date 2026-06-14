@@ -11,6 +11,11 @@ import './Lesson.css'
 
 const POINTS = { letter: 10, syllable: 25, word: 50, phrase: 100, sentence: 100 }
 
+const SPEECH_PREFIXES = [
+  'LETRA ', 'A LETRA ', 'O SOM DE ', 'SOM DE ', 'SOM DA ', 'O SOM DA ',
+  'FALE ', 'DIGA ', 'A ', 'O ',
+]
+
 export default function Lesson() {
   const { moduleId, lessonId } = useParams()
   const navigate = useNavigate()
@@ -54,7 +59,7 @@ export default function Lesson() {
     if (kb.completed && !lessonCompleted) {
       setLessonCompleted(true)
       const currentLesson = lessonRef.current
-      const points = POINTS[currentLesson?.lesson_type] || 10
+      const points = (POINTS[currentLesson?.lesson_type] || 10) + speechScore
       const accuracy = kb.attempts > 0 ? Math.round(((kb.attempts - kb.errors) / kb.attempts) * 100) : 100
       const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
 
@@ -118,6 +123,31 @@ export default function Lesson() {
       .finally(() => setLoading(false))
   }, [lessonId])
 
+  const normalize = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+
+  const tryExtractTarget = (transcript, target, sounds) => {
+    const normalized = normalize(transcript)
+    const t = normalize(target)
+
+    if (sounds.some(s => normalized === normalize(s))) return true
+
+    if (normalized === t) return true
+
+    for (const prefix of SPEECH_PREFIXES) {
+      const stripped = normalized.replace(normalize(prefix), '')
+      if (stripped === t) return true
+      if (sounds.some(s => stripped === normalize(s))) return true
+    }
+
+    const words = normalized.split(/\s+/)
+    if (words.includes(t)) return true
+    if (sounds.some(s => words.includes(normalize(s)))) return true
+
+    if (normalized.endsWith(t)) return true
+
+    return false
+  }
+
   const handleSpeech = () => {
     startListening(
       (transcript) => {
@@ -133,11 +163,7 @@ export default function Lesson() {
           if (sound) acceptedSounds.push(sound)
         }
 
-        const isCorrect = acceptedSounds.some(s => {
-          const normalizedTranscript = transcript.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          const normalizedSound = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          return normalizedTranscript === normalizedSound
-        })
+        const isCorrect = tryExtractTarget(transcript, target, acceptedSounds)
 
         setSpeechCorrect(isCorrect)
         setSpeechExpected(target)
@@ -243,6 +269,9 @@ export default function Lesson() {
               {speechCorrect ? '✅' : '❌'} Você disse: <strong>{speechResult}</strong>
               {!speechCorrect && (
                 <span className="speech-expected"> (esperado: {speechExpected})</span>
+              )}
+              {!speechCorrect && (
+                <div className="speech-suggestion">💡 Tente falar só a letra: <strong>{speechExpected}</strong></div>
               )}
             </div>
           )}
