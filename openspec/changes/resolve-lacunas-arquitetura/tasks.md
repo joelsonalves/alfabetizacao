@@ -43,12 +43,12 @@
 
 ## 5. Migração de Dados
 
-- [ ] 5.1 Refatorar `backend/app/seed.py` para migration Alembic versionada (dados dos 7 níveis)
-- [ ] 5.2 Criar migration para dados de lições e módulos (upgrade + downgrade)
-- [ ] 5.3 Criar migration para dados de achievements (upgrade + downgrade)
-- [ ] 5.4 Verificar que `alembic upgrade head` funciona em banco vazio
-- [ ] 5.5 Verificar que `alembic downgrade -1` reverte corretamente sem perder dados de usuário
-- [ ] 5.6 Documentar comandos de migração em README ou comentário no seed.py
+- [x] 5.1 Refatorar `backend/app/seed.py` para migration Alembic versionada (dados dos 7 níveis)
+- [x] 5.2 Criar migration para dados de lições e módulos (upgrade + downgrade)
+- [x] 5.3 Criar migration para dados de achievements (upgrade + downgrade) — achievements são desbloqueados dinamicamente, sem seed estático
+- [x] 5.4 Verificar que `alembic upgrade head` funciona em banco vazio
+- [x] 5.5 Verificar que `alembic downgrade -1` reverte corretamente sem perder dados de usuário
+- [x] 5.6 Documentar comandos de migração em README ou comentário no seed.py
 
 ## 6. Observabilidade
 
