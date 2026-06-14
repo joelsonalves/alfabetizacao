@@ -9,6 +9,14 @@ export const LETTER_SOUNDS = {
   'Z': 'zê',
 }
 
+export const LETTER_WORDS = {
+  'A': 'abelha', 'B': 'basquete', 'C': 'cachorro', 'D': 'dado', 'E': 'estrela',
+  'F': 'fogo', 'G': 'gato', 'H': 'hospital', 'I': 'iguana', 'J': 'jacaré',
+  'K': 'kiwi', 'L': 'limão', 'M': 'maçã', 'N': 'nota', 'O': 'olho',
+  'P': 'pinguim', 'Q': 'queijo', 'R': 'rato', 'S': 'sol', 'T': 'tartaruga',
+  'U': 'unicórnio', 'V': 'vaca', 'W': 'lobo', 'X': 'xis', 'Y': 'ioiô', 'Z': 'zebra',
+}
+
 export function useSpeech() {
   const [voices, setVoices] = useState([])
   const [ptVoice, setPtVoice] = useState(null)
@@ -71,5 +79,16 @@ export function useSpeech() {
     speak(word.toLowerCase())
   }, [speak])
 
-  return { speak, speakLetter, speakSyllable, speakWord, supported, voices, ptVoice }
+  const speakLetterWithWord = useCallback((letter) => {
+    const upper = letter.toUpperCase()
+    const sound = LETTER_SOUNDS[upper] || upper
+    const word = LETTER_WORDS[upper]
+    if (word) {
+      speak(`${sound}. ${upper} de ${word}.`)
+    } else {
+      speak(sound)
+    }
+  }, [speak])
+
+  return { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported, voices, ptVoice }
 }

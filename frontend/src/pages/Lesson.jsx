@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { useSpeech, LETTER_SOUNDS } from '../hooks/useSpeech'
+import { useSpeech, LETTER_SOUNDS, LETTER_WORDS } from '../hooks/useSpeech'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useKeyboard } from '../hooks/useKeyboard'
 import { useAuth } from '../hooks/useAuth'
@@ -29,10 +29,11 @@ export default function Lesson() {
   const [speechCorrect, setSpeechCorrect] = useState(null)
   const [speechExpected, setSpeechExpected] = useState('')
   const [speechScore, setSpeechScore] = useState(0)
+  const [speechNoResult, setSpeechNoResult] = useState(false)
   const [levelUp, setLevelUp] = useState(null)
   const { user, setUser } = useAuth()
 
-  const { speakLetter, speakSyllable, speakWord, supported: ttsSupported } = useSpeech()
+  const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported } = useSpeech()
   const { isListening, supported: srSupported, startListening } = useSpeechRecognition()
 
   const lessonRef = useRef(lesson)
@@ -103,6 +104,7 @@ export default function Lesson() {
     setSpeechCorrect(null)
     setSpeechExpected('')
     setSpeechScore(0)
+    setSpeechNoResult(false)
     prevTypedChars.current = ''
 
     Promise.all([
@@ -149,9 +151,11 @@ export default function Lesson() {
   }
 
   const handleSpeech = () => {
+    setSpeechNoResult(false)
     startListening(
       (transcript) => {
         setSpeechResult(transcript)
+        setSpeechNoResult(false)
         const currentLesson = lessonRef.current
         if (!currentLesson) return
 
@@ -164,22 +168,28 @@ export default function Lesson() {
         }
 
         const isCorrect = tryExtractTarget(transcript, target, acceptedSounds)
-
         setSpeechCorrect(isCorrect)
         setSpeechExpected(target)
 
         if (isCorrect) {
           setSpeechScore(s => s + 5)
           if (ttsSupported) {
-            if (currentLesson.lesson_type === 'letter') {
-              speakLetter(target)
-            } else {
-              speakWord(currentLesson.target)
-            }
+            speak(`Você falou ${transcript}. Parabéns!`)
+          }
+        } else {
+          if (ttsSupported) {
+            speak(`Você falou ${transcript}. Vamos tentar novamente!`)
           }
         }
       },
-      (error) => console.log('Speech error:', error),
+      (error) => {
+        if (error === 'no-speech' || error === 'audio-capture') {
+          setSpeechNoResult(true)
+        }
+      },
+      () => {
+        setSpeechNoResult(true)
+      },
     )
   }
 
@@ -256,13 +266,34 @@ export default function Lesson() {
           </div>
 
           {srSupported && (
-            <button
-              className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
-              onClick={handleSpeech}
-              disabled={isListening}
-            >
-              🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
-            </button>
+            <div className="speech-actions">
+              <button
+                className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
+                onClick={handleSpeech}
+                disabled={isListening}
+              >
+                🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
+              </button>
+              {ttsSupported && (
+                <button
+                  className="btn btn-ghost listen-btn"
+                  onClick={() => {
+                    if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
+                      speakLetterWithWord(lesson.target)
+                    } else {
+                      speakWord(lesson.target)
+                    }
+                  }}
+                >
+                  🔊 Ouvir
+                </button>
+              )}
+            </div>
+          )}
+          {speechNoResult && (
+            <div className="speech-noresult">
+              🎤 Não entendi. Tente dizer: <strong>LETRA {lesson?.target || ''}</strong>
+            </div>
           )}
           {speechResult && (
             <div className={`speech-result ${speechCorrect ? 'speech-correct' : 'speech-incorrect'}`}>

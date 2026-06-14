@@ -108,6 +108,22 @@
 .speech-btn {
   margin-top: 12px;
 }
+.speech-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.listen-btn {
+  font-size: 0.9rem;
+}
+.speech-noresult {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: var(--color-accent);
+  font-weight: 500;
+}
 
 .speech-result {
   margin-top: 8px;
