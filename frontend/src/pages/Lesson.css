@@ -214,6 +214,13 @@
   opacity: 0.8;
 }
 
+.typing-error {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--color-error);
+  font-weight: 500;
+}
+
 .lesson-result {
   margin-top: 24px;
   text-align: center;

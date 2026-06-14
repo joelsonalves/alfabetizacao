@@ -81,11 +81,12 @@ export function useSpeech() {
 
   const speakLetterWithWord = useCallback((letter) => {
     const upper = letter.toUpperCase()
-    const sound = LETTER_SOUNDS[upper] || upper
     const word = LETTER_WORDS[upper]
     if (word) {
-      speak(`${sound}. ${upper} de ${word}.`)
+      const capitalized = word.charAt(0).toUpperCase() + word.slice(1)
+      speak(`${upper} → de ${capitalized}.`)
     } else {
+      const sound = LETTER_SOUNDS[upper] || upper
       speak(sound)
     }
   }, [speak])

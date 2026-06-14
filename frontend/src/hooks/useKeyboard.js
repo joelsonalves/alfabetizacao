@@ -15,6 +15,7 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
   const [attempts, setAttempts] = useState(0)
   const [errors, setErrors] = useState(0)
   const [completed, setCompleted] = useState(false)
+  const [lastWrongKey, setLastWrongKey] = useState(null)
 
   const isLetterType = lessonType === 'letter'
   const isSyllableType = lessonType === 'syllable'
@@ -26,6 +27,7 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
     setAttempts(0)
     setErrors(0)
     setCompleted(false)
+    setLastWrongKey(null)
   }, [target, lessonType])
 
   const getExpectedChar = useCallback(() => {
@@ -59,6 +61,7 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
         }
       } else {
         setErrors(e => e + 1)
+        setLastWrongKey(key)
         if (onKeyWrong) onKeyWrong(key)
       }
     }
@@ -83,6 +86,7 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
     attempts,
     errors,
     completed,
+    lastWrongKey,
     ABNT2_KEYS,
     handleVirtualKeyClick,
     getExpectedChar,

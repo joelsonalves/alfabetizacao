@@ -51,6 +51,7 @@
 - [x] 7.2 Implementar detecção de teclado físico com hook useKeyboard
 - [x] 7.3 Implementar highlight da tecla pressionada com animação
 - [x] 7.4 Suportar clique nas teclas virtuais
+- [x] 7.5 Adicionar state lastWrongKey no hook useKeyboard para feedback visual de erro
 
 ## 8. Frontend: Áudio e Fala
 
@@ -60,6 +61,7 @@
 - [x] 8.4 Tocar som da sílaba ao formar combinação
 - [x] 8.5 Tocar som da palavra/frase ao completar
 - [x] 8.6 Implementar hook useSpeechRecognition para microfone
+- [x] 8.7 Melhorar speakLetterWithWord: formato "A → de Abelha." (seta + capitalização)
 
 ## 9. Frontend: Módulos de Aprendizado
 
@@ -72,6 +74,7 @@
 - [x] 9.7 Implementar Level 5: Palavras com imagens reais
 - [x] 9.8 Implementar Level 6: Frases com cenas
 - [x] 9.9 Implementar Level 7: Orações completas
+- [x] 9.10 Exibir feedback visual de tecla errada na lição (Lesson.jsx + Lesson.css)
 
 ## 10. Frontend: Gamificação
 

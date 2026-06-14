@@ -320,6 +320,11 @@ export default function Lesson() {
           <div className="lesson-typed">
             {kb.typedChars}
           </div>
+          {kb.lastWrongKey && (
+            <div className="typing-error">
+              ❌ Você digitou: <strong>{kb.lastWrongKey}</strong> (esperado: <strong>{kb.getExpectedChar()}</strong>)
+            </div>
+          )}
 
           <div className="progress-checklist">
             <div className={`checklist-item ${hasListened ? 'done' : ''}`}>
