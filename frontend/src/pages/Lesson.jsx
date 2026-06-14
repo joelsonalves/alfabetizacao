@@ -148,6 +148,8 @@ export default function Lesson() {
 
   const normalize = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
 
+  const stripSpaces = (s) => s.replace(/\s+/g, '')
+
   const tryExtractTarget = (transcript, target, sounds) => {
     const normalized = normalize(transcript)
     const t = normalize(target)
@@ -155,6 +157,9 @@ export default function Lesson() {
     if (sounds.some(s => normalized === normalize(s))) return true
 
     if (normalized === t) return true
+
+    if (stripSpaces(normalized) === stripSpaces(t)) return true
+    if (sounds.some(s => stripSpaces(normalized) === stripSpaces(normalize(s)))) return true
 
     for (const prefix of SPEECH_PREFIXES) {
       const stripped = normalized.replace(normalize(prefix), '')
@@ -313,16 +318,18 @@ export default function Lesson() {
           </div>
 
           <div className="lesson-typed">
-            {kb.typedChars || <span className="hint">Digite o que está na tela</span>}
+            {kb.typedChars}
           </div>
 
           <div className="progress-checklist">
             <div className={`checklist-item ${hasListened ? 'done' : ''}`}>
               <span className="checklist-icon">{hasListened ? '✅' : '❌'}</span>
               <span className="checklist-label">Ouvir</span>
-              <span className="checklist-desc">"{lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
-                ? `${lesson.target}. ${lesson.target} de ${LETTER_WORDS[lesson.target?.toUpperCase()] || ''}.`
-                : lesson.target}"</span>
+              <span className="checklist-desc">"{lesson.lesson_type === 'review'
+                ? lesson.target.split('').join(' ')
+                : lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
+                  ? `${lesson.target}. ${lesson.target} de ${LETTER_WORDS[lesson.target?.toUpperCase()] || ''}.`
+                  : lesson.target}"</span>
             </div>
             <div className={`checklist-item ${speechCorrect ? 'done' : ''}`}>
               <span className="checklist-icon">{speechCorrect ? '✅' : '❌'}</span>
@@ -343,7 +350,11 @@ export default function Lesson() {
                   className="btn btn-ghost listen-btn"
                   onClick={() => {
                     setHasListened(true)
-                    if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
+                    if (lesson.lesson_type === 'review') {
+                      lesson.target.split('').forEach((ch, i) => {
+                        setTimeout(() => speakLetterWithWord(ch), i * 1500)
+                      })
+                    } else if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
                       speakLetterWithWord(lesson.target)
                     } else {
                       speakWord(lesson.target)
