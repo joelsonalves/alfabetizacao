@@ -107,6 +107,7 @@
 - [ ] 14.2 Desabilitar botões Ouvir e Fale enquanto sistema estiver falando (isSpeaking)
 - [ ] 14.3 Unificar feedbacks de teclado e fala numa lista acima do VirtualKeyboard
 - [ ] 14.4 Remover marcação incorreta de lições anteriores como concluídas na navegação
+- [ ] 14.5 Corrigir W de lobo → W de waffle (useSpeech.js + images.py)
 
 - [x] 13.1 Conectar frontend com backend (serviço API)
 - [x] 13.2 Testar fluxo completo: cadastro → login → progressão
