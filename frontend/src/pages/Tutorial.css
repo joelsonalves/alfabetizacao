@@ -72,7 +72,7 @@
 .tutorial-highlight {
   position: relative;
   z-index: 1001;
-  box-shadow: 0 0 0 4px var(--color-accent), 0 0 24px rgba(232, 168, 56, 0.5);
+  box-shadow: 0 0 0 4px var(--color-accent), 0 0 24px rgba(181, 125, 26, 0.5);
   border-radius: var(--radius-md);
   animation: pulse 1.5s infinite;
 }

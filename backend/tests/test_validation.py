@@ -1,4 +1,5 @@
 import pytest
+from app.models.module import LearningModule, Lesson
 
 
 @pytest.mark.asyncio
@@ -40,13 +41,20 @@ async def test_progress_update_invalid_payload(client, auth_headers):
 
 
 @pytest.mark.asyncio
-async def test_progress_update_negative_values(client, auth_headers):
+async def test_progress_update_negative_values(client, auth_headers, db_session):
+    module = LearningModule(name="Test", module_type="vowel", description="", sort_order=1)
+    db_session.add(module)
+    db_session.flush()
+    lesson = Lesson(module_id=module.id, name="Test", lesson_type="letter", target="A", sort_order=1)
+    db_session.add(lesson)
+    db_session.commit()
+
     response = await client.post(
-        "/api/progress/lesson/1",
+        f"/api/progress/lesson/{lesson.id}",
         headers=auth_headers,
         json={"score": -10, "stars": -1, "completed": False, "attempts": -1},
     )
-    assert response.status_code == 422 or response.status_code == 200
+    assert response.status_code in (422, 200)
 
 
 @pytest.mark.asyncio

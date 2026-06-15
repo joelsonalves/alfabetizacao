@@ -169,8 +169,8 @@ def upgrade() -> None:
     )
 
     phrases = [
-        "O GATO BEBE", "A BOLA ROLA", "O SOL BRILHA", "A CASA É GRANDE",
-        "O RATO COMEU O QUEIJO", "A FLOR É LINDA", "MEU GATO É PRETO", "A BORBOLETA VOOU",
+        "O GATO BEBE LEITE", "A MENINA JOGA BOLA", "O PÁSSARO CANTA ALTO", "A CASA TEM JANELAS",
+        "O RATO COMEU QUEIJO", "A FLOR TEM ESPINHOS", "MEU PAI DIRIGE CARRO", "A BORBOLETA TEM ASAS",
     ]
     for i, phrase in enumerate(phrases, 1):
         conn.execute(
@@ -190,14 +190,14 @@ def upgrade() -> None:
     )
 
     sentences = [
-        "O GATO BEBEU LEITE.",
-        "A CASA TEM UMA PORTA VERMELHA.",
-        "O MENINO JOGA A BOLA NO QUINTAL.",
-        "AS FLORES DO JARDIM SÃO COLORIDAS.",
-        "O CACHORRO CORRE ATRÁS DO GATO.",
-        "A BORBOLETA POUSOU NA FLOR AMARELA.",
-        "O SOL SE PÔS E A LUA BRILHOU.",
-        "PEDRO E MARIA FORAM À ESCOLA JUNTOS.",
+        "O GATO BEBEU LEITE E DORMIU NO SOFÁ.",
+        "A CASA TEM PORTA VERMELHA E AS JANELAS SÃO AZUIS.",
+        "O MENINO JOGA BOLA E A MENINA PULA CORDA.",
+        "O SOL BRILHOU DE MANHÃ MAS A TARDE FICOU NUBLADA.",
+        "O CACHORRO CORREU E O GATO SUBIU NO MURO.",
+        "A BORBOLETA POUSOU NA FLOR E ABRIU AS ASAS.",
+        "PEDRO ESTUDOU A LIÇÃO E TIROU NOTA DEZ.",
+        "MARIA REGOU AS PLANTAS E COLHEU AS FLORES.",
     ]
     for i, sentence in enumerate(sentences, 1):
         conn.execute(

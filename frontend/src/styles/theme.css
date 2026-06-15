@@ -4,12 +4,12 @@
   --bg-card: #FFFFFF;
   --text-primary: #2D2D2D;
   --text-secondary: #6B6B6B;
-  --text-muted: #9E9E9E;
-  --color-primary: #3D8D8C;
-  --color-primary-light: #5AA9A8;
-  --color-primary-dark: #2C6B6A;
-  --color-accent: #E8A838;
-  --color-accent-light: #F0C060;
+  --text-muted: #767676;
+  --color-primary: #2D7A79;
+  --color-primary-light: #4A9E9D;
+  --color-primary-dark: #1E5C5B;
+  --color-accent: #B57D1A;
+  --color-accent-light: #D4A34A;
   --color-success: #6BBF59;
   --color-success-light: #8FD480;
   --color-error: #D9706B;
@@ -82,14 +82,14 @@ h1, h2, h3, h4 {
 
 /* Buttons */
 .focus-visible {
-  outline: 2px solid #3D8D8C;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .btn:focus-visible,
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid #3D8D8C;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 

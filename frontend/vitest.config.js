@@ -8,11 +8,12 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/tests/setupTests.js'],
     css: false,
+    exclude: ['node_modules', 'dist', 'src/e2e/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.{js,jsx}'],
-      exclude: ['src/main.jsx', 'src/tests/**'],
+      exclude: ['src/main.jsx', 'src/tests/**', 'src/e2e/**'],
     },
   },
 })

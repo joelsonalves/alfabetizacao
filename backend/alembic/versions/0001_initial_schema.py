@@ -51,7 +51,7 @@ def upgrade() -> None:
         sa.Column("module_id", sa.Integer(), sa.ForeignKey("learning_modules.id"), nullable=False),
         sa.Column("name", sa.String(100), nullable=False),
         sa.Column("lesson_type", sa.String(50), nullable=False),
-        sa.Column("target", sa.String(10), nullable=False),
+        sa.Column("target", sa.String(100), nullable=False),
         sa.Column("content", sa.JSON(), nullable=True),
         sa.Column("sort_order", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id"),

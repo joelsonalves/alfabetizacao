@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import React from 'react'
 import Lesson from '../pages/Lesson'
@@ -29,6 +30,7 @@ vi.mock('../services/api', () => ({
       word: () => Promise.resolve({ type: 'emoji', value: '🖼️' }),
     },
   },
+  updateProgressWithRetry: (...args) => mockApiProgressUpdate(...args),
 }))
 
 vi.mock('../hooks/useSpeech', () => ({
@@ -39,6 +41,7 @@ vi.mock('../hooks/useSpeech', () => ({
     speakWord: vi.fn(),
     speakLetterWithWord: vi.fn(),
     supported: true,
+    isSpeaking: false,
   }),
   LETTER_SOUNDS: { A: 'a' },
   LETTER_WORDS: { A: 'Abelha' },
@@ -48,7 +51,7 @@ vi.mock('../hooks/useSpeechRecognition', () => ({
   useSpeechRecognition: () => ({
     isListening: false,
     supported: true,
-    startListening: vi.fn(),
+    startListening: vi.fn((onResult) => { onResult('A') }),
   }),
 }))
 
@@ -92,7 +95,7 @@ describe('Lesson page', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Q' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Letra Q' })).toBeInTheDocument()
     })
   })
 
@@ -111,6 +114,7 @@ describe('Lesson page', () => {
   })
 
   it('calls progress API when typing completes', async () => {
+    const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/lesson/1/1']}>
         <Routes>
@@ -122,6 +126,10 @@ describe('Lesson page', () => {
     await waitFor(() => {
       expect(screen.getByText('Vogais')).toBeInTheDocument()
     })
+
+    await user.click(screen.getByRole('button', { name: /Ouvir/ }))
+    await user.click(screen.getByRole('button', { name: /Falar/ }))
+
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
     await waitFor(() => {
       expect(mockApiProgressUpdate).toHaveBeenCalled()

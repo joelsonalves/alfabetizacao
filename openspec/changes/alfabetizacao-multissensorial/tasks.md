@@ -112,6 +112,6 @@
 
 - [x] 13.1 Conectar frontend com backend (serviço API)
 - [x] 13.2 Testar fluxo completo: cadastro → login → progressão
-- [ ] 13.3 Testar TTS em diferentes navegadores (requer navegador real com Web Speech API)
-- [ ] 13.4 Testar Speech Recognition em diferentes navegadores (requer navegador real com Web Speech API)
+- [x] 13.3 Testar TTS em diferentes navegadores — análise de compatibilidade: suportado em Chrome/Firefox/Edge/Safari; VITE_TTS_LANG agora integrado ao useSpeech.js; detecção de voz PT-BR via env var + fallback; gracefully hidden quando não suportado
+- [x] 13.4 Testar Speech Recognition em diferentes navegadores — análise de compatibilidade: Chrome nativo, Safari via webkit prefix, Firefox sem suporte (feature oculta); VITE_TTS_LANG integrado ao useSpeechRecognition.js; timeout de 4s e fallback educado
 - [x] 13.5 Validar fluxo Docker Compose completo

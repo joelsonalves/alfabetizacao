@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 
 const SPEECH_TIMEOUT = 4000
+const SR_LANG = import.meta.env.VITE_TTS_LANG || 'pt-BR'
 
 export function useSpeechRecognition() {
   const [isListening, setIsListening] = useState(false)
@@ -16,7 +17,7 @@ export function useSpeechRecognition() {
     }
 
     const recognition = new SpeechRecognition()
-    recognition.lang = 'pt-BR'
+    recognition.lang = SR_LANG
     recognition.continuous = false
     recognition.interimResults = false
 

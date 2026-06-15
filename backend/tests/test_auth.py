@@ -1,4 +1,5 @@
 import pytest
+from app.services.auth import create_refresh_token, decode_access_token, get_token_jti
 
 
 @pytest.mark.asyncio
@@ -83,3 +84,67 @@ async def test_me_unauthenticated(client):
 async def test_me_invalid_token(client):
     response = await client.get("/api/auth/me", headers={"Authorization": "Bearer invalid-token"})
     assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_refresh_token(client, test_user):
+    login_resp = await client.post("/api/auth/login", json={
+        "email": "teste@teste.com", "password": "123456",
+    })
+    refresh_token = login_resp.json()["refresh_token"]
+
+    response = await client.post("/api/auth/refresh", json={
+        "refresh_token": refresh_token,
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_reuse_revoked(client, test_user):
+    login_resp = await client.post("/api/auth/login", json={
+        "email": "teste@teste.com", "password": "123456",
+    })
+    refresh_token = login_resp.json()["refresh_token"]
+
+    resp1 = await client.post("/api/auth/refresh", json={"refresh_token": refresh_token})
+    assert resp1.status_code == 200
+
+    resp2 = await client.post("/api/auth/refresh", json={"refresh_token": refresh_token})
+    assert resp2.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_invalid(client):
+    response = await client.post("/api/auth/refresh", json={
+        "refresh_token": "invalid-token",
+    })
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_logout(client, test_user):
+    login_resp = await client.post("/api/auth/login", json={
+        "email": "teste@teste.com", "password": "123456",
+    })
+    refresh_token = login_resp.json()["refresh_token"]
+
+    response = await client.post("/api/auth/logout", json={
+        "refresh_token": refresh_token,
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Logged out successfully"
+
+
+@pytest.mark.asyncio
+async def test_get_token_jti(client, auth_token):
+    jti = get_token_jti(auth_token)
+    assert jti is not None
+    assert isinstance(jti, str)
+
+
+def test_get_token_jti_invalid():
+    assert get_token_jti("invalid-token") is None

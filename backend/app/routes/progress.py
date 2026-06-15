@@ -49,8 +49,7 @@ def update_progress(
 
     user.xp += data.score
 
-    xp_for_next_level = user.level * 500
-    if user.xp >= xp_for_next_level:
+    while user.xp >= user.level * 500:
         user.level += 1
 
     db.commit()

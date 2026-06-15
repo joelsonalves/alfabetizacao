@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './HelpButton.css'
 
 const HELP_TIPS = {
@@ -32,23 +32,33 @@ export default function HelpButton({ context = 'default' }) {
   const [open, setOpen] = useState(false)
   const tip = HELP_TIPS[context] || HELP_TIPS.default
 
+  useEffect(() => {
+    if (!open) return
+    const handleKey = (e) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [open])
+
   return (
     <>
       <button
         className={`help-btn ${open ? 'help-btn-active' : ''}`}
         onClick={() => setOpen(o => !o)}
-        title="Ajuda"
+        aria-label="Ajuda"
+        aria-expanded={open}
       >
         ?
       </button>
       {open && (
-        <div className="help-tooltip card" onClick={() => setOpen(false)}>
+        <div className="help-tooltip card" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
           <div className="help-tooltip-header">
             <span className="help-tooltip-icon">💡</span>
             <span className="help-tooltip-title">{tip.title}</span>
           </div>
           <p className="help-tooltip-text">{tip.text}</p>
-          <button className="help-tooltip-close">✕</button>
+          <button className="help-tooltip-close" onClick={() => setOpen(false)}>✕</button>
         </div>
       )}
     </>

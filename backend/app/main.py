@@ -1,7 +1,9 @@
 import time
 import uuid
+import asyncio
 import logging
 from datetime import datetime
+from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI, Depends, HTTPException, Request
@@ -13,6 +15,7 @@ from app.config import settings
 from app.database import get_db
 from app.routes import auth, modules, progress, images
 from app.services.auth import decode_access_token
+from app.services.cleanup import clean_expired_blocklist
 
 logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO))
 
@@ -31,10 +34,27 @@ logger = structlog.get_logger()
 
 START_TIME = time.time()
 
+_cleanup_task = None
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    global _cleanup_task
+    _cleanup_task = asyncio.create_task(clean_expired_blocklist())
+    yield
+    if _cleanup_task:
+        _cleanup_task.cancel()
+        try:
+            await _cleanup_task
+        except asyncio.CancelledError:
+            pass
+
+
 app = FastAPI(
     title="Alfabetização Multissensorial API",
     description="API do sistema de alfabetização com digitação",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(

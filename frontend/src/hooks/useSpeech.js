@@ -17,6 +17,9 @@ export const LETTER_WORDS = {
   'U': 'unicórnio', 'V': 'vaca',   'W': 'waffle', 'X': 'xis', 'Y': 'ioiô', 'Z': 'zebra',
 }
 
+const TTS_LANG = import.meta.env.VITE_TTS_LANG || 'pt-BR'
+const TTS_LANG_PREFIX = TTS_LANG.split('-')[0]
+
 export function useSpeech() {
   const [voices, setVoices] = useState([])
   const [ptVoice, setPtVoice] = useState(null)
@@ -35,7 +38,7 @@ export function useSpeech() {
       const allVoices = window.speechSynthesis.getVoices()
       setVoices(allVoices)
       const pt = allVoices.find(
-        v => v.lang.startsWith('pt') || v.lang.startsWith('pt-BR')
+        v => v.lang.startsWith(TTS_LANG) || v.lang.startsWith(TTS_LANG_PREFIX)
       )
       setPtVoice(pt || allVoices[0] || null)
     }
@@ -56,7 +59,7 @@ export function useSpeech() {
 
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.voice = ptVoice
-    utterance.lang = ptVoice.lang || 'pt-BR'
+    utterance.lang = ptVoice.lang || TTS_LANG
     utterance.rate = 0.9
     utterance.pitch = 1.0
 
