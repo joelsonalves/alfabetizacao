@@ -13,8 +13,27 @@ const POINTS = { letter: 10, syllable: 25, word: 50, phrase: 100, sentence: 100 
 
 const SPEECH_PREFIXES = [
   'LETRA ', 'A LETRA ', 'O SOM DE ', 'SOM DE ', 'SOM DA ', 'O SOM DA ',
+  'SÍLABA ', 'A SÍLABA ', 'PALAVRA ', 'A PALAVRA ', 'FRASE ', 'A FRASE ',
   'FALE ', 'DIGA ', 'A ', 'O ',
 ]
+
+const SPEECH_TYPE_LABELS = {
+  letter: 'LETRA',
+  consonant: 'LETRA',
+  syllable: 'SÍLABA',
+  word: 'PALAVRA',
+  phrase: 'FRASE',
+  sentence: 'FRASE',
+}
+
+const SPEECH_TYPE_NAMES = {
+  letter: 'letra',
+  consonant: 'letra',
+  syllable: 'sílaba',
+  word: 'palavra',
+  phrase: 'frase',
+  sentence: 'frase',
+}
 
 export default function Lesson() {
   const { moduleId, lessonId } = useParams()
@@ -47,7 +66,7 @@ export default function Lesson() {
 
   const addFeedback = useCallback((type, message) => {
     const id = ++feedbackIdRef.current
-    setFeedbacks(prev => [...prev.slice(-9), { id, type, message }])
+    setFeedbacks(prev => [...prev.slice(-4), { id, type, message }])
   }, [])
 
   const lessonRef = useRef(lesson)
@@ -166,7 +185,7 @@ export default function Lesson() {
       .finally(() => setLoading(false))
   }, [lessonId])
 
-  const normalize = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+  const normalize = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z\s]/g, '').trim()
 
   const stripSpaces = (s) => s.replace(/\s+/g, '')
 
@@ -206,6 +225,7 @@ export default function Lesson() {
         if (!currentLesson) return
 
         const target = currentLesson.target?.toUpperCase() || ''
+        const displayTarget = target.replace(/[^A-ZÀ-Ü\s]/g, '').trim()
         const acceptedSounds = [target]
 
         if (currentLesson.lesson_type === 'letter' || currentLesson.lesson_type === 'consonant') {
@@ -215,7 +235,7 @@ export default function Lesson() {
 
         const isCorrect = tryExtractTarget(transcript, target, acceptedSounds)
         setSpeechCorrect(isCorrect)
-        setSpeechExpected(target)
+        setSpeechExpected(displayTarget)
 
         if (isCorrect) {
           setHasSpoken(true)
@@ -225,7 +245,7 @@ export default function Lesson() {
             speak(`Você falou ${transcript}. Parabéns!`)
           }
         } else {
-          addFeedback('speech', `Falou: ${transcript} ❌ (esperado: ${target})`)
+          addFeedback('speech', `Falou: ${transcript} ❌ (esperado: ${displayTarget})`)
           if (ttsSupported) {
             speak(`Você falou ${transcript}. Vamos tentar novamente!`)
           }
@@ -420,7 +440,7 @@ export default function Lesson() {
           )}
           {speechNoResult && (
             <div className="speech-noresult">
-              🎤 Não entendi. Tente dizer: <strong>LETRA {lesson?.target || ''}</strong>
+              🎤 Não entendi. Tente dizer: <strong>{(SPEECH_TYPE_LABELS[lesson?.lesson_type] || '') + ' ' + (lesson?.target || '')}</strong>
             </div>
           )}
           {speechResult && (
@@ -430,7 +450,7 @@ export default function Lesson() {
                 <span className="speech-expected"> (esperado: {speechExpected})</span>
               )}
               {!speechCorrect && (
-                <div className="speech-suggestion">💡 Tente falar só a letra: <strong>{speechExpected}</strong></div>
+                <div className="speech-suggestion">💡 Tente falar só a {SPEECH_TYPE_NAMES[lesson?.lesson_type] || 'letra'}: <strong>{speechExpected}</strong></div>
               )}
             </div>
           )}
