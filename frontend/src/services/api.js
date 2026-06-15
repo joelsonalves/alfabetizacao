@@ -17,7 +17,7 @@ async function request(path, options = {}) {
     headers['Authorization'] = `Bearer ${token}`
   }
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers })
-  if (res.status === 401 && !options._retry) {
+  if (res.status === 401 && !options._retry && !path.endsWith('/auth/login')) {
     const refreshToken = localStorage.getItem('refresh_token')
     if (refreshToken) {
       if (!isRefreshing) {

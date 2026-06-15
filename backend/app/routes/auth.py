@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.user import User, TokenBlocklist
 from app.schemas.user import UserRegister, UserLogin, UserResponse, TokenResponse, RefreshRequest, LogoutResponse
 from app.services.auth import hash_password, verify_password, create_access_token, create_refresh_token, decode_access_token
+from app.services.cleanup import clean_expired_blocklist_sync
 
 router = APIRouter()
 
@@ -55,9 +56,10 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(data: UserLogin, db: Session = Depends(get_db)):
+    clean_expired_blocklist_sync(db)
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Email ou senha inválidos")
 
     today = datetime.utcnow().date()
     if user.last_active_date:
@@ -79,6 +81,7 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
+    clean_expired_blocklist_sync(db)
     payload = decode_access_token(data.refresh_token)
     if payload is None:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -107,6 +110,7 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
 
 @router.post("/logout", response_model=LogoutResponse)
 def logout(data: RefreshRequest, db: Session = Depends(get_db)):
+    clean_expired_blocklist_sync(db)
     payload = decode_access_token(data.refresh_token)
     if payload is None:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
