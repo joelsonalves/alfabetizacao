@@ -8,6 +8,7 @@ from app.models.progress import UserProgress, Achievement, Session as UserSessio
 from app.models.module import Lesson
 from app.schemas.module import ProgressUpdate, ProgressResponse, AchievementResponse
 from app.routes.auth import get_current_user
+from app.services.progress import calculate_level, check_version_conflict, apply_progress_update
 
 router = APIRouter()
 
@@ -32,25 +33,17 @@ def update_progress(
         progress = UserProgress(user_id=user.id, lesson_id=lesson_id)
         db.add(progress)
         db.flush()
-    elif data.version is not None and progress.version != data.version:
+    elif check_version_conflict(progress, data.version):
         raise HTTPException(
             status_code=409,
             detail="Conflito: progresso atualizado por outra aba. Recarregue e tente novamente.",
         )
 
-    progress.score = (progress.score or 0) + data.score
-    progress.stars = max(progress.stars or 0, data.stars)
-    progress.attempts = (progress.attempts or 0) + data.attempts
-    if data.completed and not progress.completed:
-        progress.completed = True
-        progress.completed_at = datetime.utcnow()
-
-    progress.version = (progress.version or 0) + 1
+    apply_progress_update(progress, data)
 
     user.xp += data.score
 
-    while user.xp >= user.level * 500:
-        user.level += 1
+    user.level = calculate_level(user.xp, user.level)
 
     db.commit()
     db.refresh(progress)

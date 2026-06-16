@@ -1,6 +1,8 @@
 from typing import Any
 from pydantic import BaseModel
 
+from app.utils.datetime import datetime_to_iso
+
 
 class ModuleResponse(BaseModel):
     id: int
@@ -48,8 +50,8 @@ class ProgressResponse(BaseModel):
 
     @classmethod
     def model_validate(cls, obj):
-        if hasattr(obj, "completed_at") and obj.completed_at is not None:
-            obj.completed_at = obj.completed_at.isoformat()
+        if hasattr(obj, "completed_at"):
+            obj.completed_at = datetime_to_iso(obj.completed_at)
         return super().model_validate(obj)
 
 
@@ -63,6 +65,6 @@ class AchievementResponse(BaseModel):
 
     @classmethod
     def model_validate(cls, obj):
-        if hasattr(obj, "unlocked_at") and obj.unlocked_at is not None:
-            obj.unlocked_at = obj.unlocked_at.isoformat()
+        if hasattr(obj, "unlocked_at"):
+            obj.unlocked_at = datetime_to_iso(obj.unlocked_at)
         return super().model_validate(obj)

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, TokenBlocklist
 from app.schemas.user import UserRegister, UserLogin, UserResponse, TokenResponse, RefreshRequest, LogoutResponse
-from app.services.auth import hash_password, verify_password, create_access_token, create_refresh_token, decode_access_token
+from app.services.auth import hash_password, verify_password, create_access_token, create_refresh_token, decode_access_token, validate_password, update_login_streak, revoke_token
 from app.services.cleanup import clean_expired_blocklist_sync
 from app.config import settings
 
@@ -46,7 +46,7 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    if len(data.password) < 6:
+    if not validate_password(data.password):
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
     user = User(
@@ -71,16 +71,7 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Email ou senha inválidos")
 
     today = datetime.utcnow().date()
-    if user.last_active_date:
-        last = user.last_active_date.date()
-        if last == today - timedelta(days=1):
-            user.streak += 1
-        elif last < today - timedelta(days=1):
-            user.streak = 1
-    else:
-        user.streak = 1
-
-    user.last_active_date = datetime.utcnow()
+    update_login_streak(user, today)
     db.commit()
 
     access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
@@ -98,17 +89,14 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid token type")
     jti = payload.get("jti")
     if jti:
-        blocked = db.query(TokenBlocklist).filter(TokenBlocklist.jti == jti).first()
-        if blocked:
-            raise HTTPException(status_code=401, detail="Refresh token revoked")
-        blocked_entry = TokenBlocklist(
+        if not revoke_token(
             jti=jti,
             token_type="refresh",
             user_id=int(payload["sub"]),
             expires_at=datetime.fromtimestamp(payload["exp"]),
-        )
-        db.add(blocked_entry)
-        db.commit()
+            db=db,
+        ):
+            raise HTTPException(status_code=401, detail="Refresh token revoked")
     user = db.query(User).filter(User.id == int(payload.get("sub"))).first()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
@@ -125,16 +113,13 @@ def logout(data: RefreshRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
     jti = payload.get("jti")
     if jti:
-        blocked = db.query(TokenBlocklist).filter(TokenBlocklist.jti == jti).first()
-        if not blocked:
-            entry = TokenBlocklist(
-                jti=jti,
-                token_type="refresh",
-                user_id=int(payload["sub"]),
-                expires_at=datetime.fromtimestamp(payload["exp"]),
-            )
-            db.add(entry)
-            db.commit()
+        revoke_token(
+            jti=jti,
+            token_type="refresh",
+            user_id=int(payload["sub"]),
+            expires_at=datetime.fromtimestamp(payload["exp"]),
+            db=db,
+        )
     return LogoutResponse()
 
 

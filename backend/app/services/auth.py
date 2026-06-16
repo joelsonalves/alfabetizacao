@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from uuid import uuid4
 from jose import jwt
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+from app.models.user import User, TokenBlocklist
 from app.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -49,3 +51,36 @@ def get_token_jti(token: str) -> str | None:
     if payload:
         return payload.get("jti")
     return None
+
+
+def validate_password(password: str) -> bool:
+    return len(password) >= 6
+
+
+def update_login_streak(user: User, today: date) -> None:
+    if user.last_active_date:
+        last = user.last_active_date.date() if isinstance(user.last_active_date, datetime) else user.last_active_date
+        if last == today:
+            return
+        if last == today - timedelta(days=1):
+            user.streak = (user.streak or 0) + 1
+        elif last < today - timedelta(days=1):
+            user.streak = 1
+    else:
+        user.streak = 1
+    user.last_active_date = datetime.utcnow()
+
+
+def revoke_token(jti: str, token_type: str, user_id: int, expires_at: datetime, db: Session) -> bool:
+    blocked = db.query(TokenBlocklist).filter(TokenBlocklist.jti == jti).first()
+    if blocked:
+        return False
+    entry = TokenBlocklist(
+        jti=jti,
+        token_type=token_type,
+        user_id=user_id,
+        expires_at=expires_at,
+    )
+    db.add(entry)
+    db.commit()
+    return True
