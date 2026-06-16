@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.routes import auth, modules, progress, images
+from app.routes import auth, modules, progress, images, admin, admin_content, feature_flags
 from app.services.auth import decode_access_token
 from app.services.cleanup import clean_expired_blocklist
 
@@ -97,6 +97,9 @@ app.include_router(modules.router, prefix="/api/modules", tags=["modules"])
 app.include_router(modules.lesson_router, prefix="/api", tags=["lessons"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 app.include_router(images.router, prefix="/api/images", tags=["images"])
+app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(admin_content.router, prefix="/admin", tags=["admin_content"])
+app.include_router(feature_flags.router, prefix="/api/feature-flags", tags=["feature_flags"])
 
 
 @app.get("/api/health")

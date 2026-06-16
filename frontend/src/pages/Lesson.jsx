@@ -149,6 +149,10 @@ export default function Lesson() {
     ]).then(([l, mods, progress]) => {
       setLesson(l)
       lessonRef.current = l
+      if (l.active === false) {
+        navigate('/dashboard')
+        return
+      }
       const mod = mods.find(m => m.id === l.module_id)
       setModule(mod)
 
@@ -161,7 +165,9 @@ export default function Lesson() {
       }
       setModuleCompletedLessons(completedSet)
 
-      if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
+      if (l.image_url) {
+        setImageData({ type: 'emoji', value: l.image_url, alt: l.alt_text || l.target })
+      } else if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
         api.images.emoji(l.target).then(setImageData).catch(() => {})
       } else if (l.lesson_type === 'word') {
         api.images.word(l.target).then(setImageData).catch(() => {})

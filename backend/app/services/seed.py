@@ -53,6 +53,41 @@ SENTENCES_DATA = [
     "PEDRO E MARIA FORAM À ESCOLA JUNTOS.",
 ]
 
+EMOJI_MAP = {
+    "A": "🐝", "B": "🏀", "C": "🐶", "D": "🎲", "E": "⭐",
+    "F": "🔥", "G": "🐱", "H": "🏥", "I": "🦎", "J": "🐊",
+    "K": "🥝", "L": "🍋", "M": "🍎", "N": "🎵", "O": "👁️",
+    "P": "🐧", "Q": "🧀", "R": "🐀", "S": "☀️", "T": "🐢",
+    "U": "🦄", "V": "🐄", "W": "🐺", "X": "❌", "Y": "🪀", "Z": "🦓",
+}
+
+WORD_IMAGE_QUERIES = {
+    "casa": "house", "bola": "ball", "gato": "cat", "dado": "dice",
+    "foca": "seal", "bala": "candy", "bebe": "baby", "bicho": "bug",
+    "burro": "donkey", "braco": "arm", "creme": "cream", "gato bebe": "cat drinking",
+    "o gato bebe": "cat drinking milk",
+}
+
+CMS_DEFAULTS = {
+    "active": True,
+    "image_active": True,
+    "alt_text": None,
+    "placeholder_text": None,
+}
+
+
+def get_lesson_image_fields(lesson_type: str, target: str) -> dict:
+    fields = dict(CMS_DEFAULTS)
+    if lesson_type in ("letter", "consonant"):
+        fields["image_url"] = EMOJI_MAP.get(target.upper())
+        fields["alt_text"] = f"Emoji da letra {target.upper()}"
+    elif lesson_type == "word":
+        word_key = target.lower()
+        query = WORD_IMAGE_QUERIES.get(word_key)
+        if query:
+            fields["alt_text"] = f"Imagem de {target}"
+    return fields
+
 MODULES_DATA = [
     {
         "name": "Vogais",
@@ -60,12 +95,12 @@ MODULES_DATA = [
         "description": "Aprenda as vogais: A, E, I, O, U",
         "sort_order": 1,
         "lessons": [
-            {"name": "Vogal A", "lesson_type": "letter", "target": "A", "sort_order": 1},
-            {"name": "Vogal E", "lesson_type": "letter", "target": "E", "sort_order": 2},
-            {"name": "Vogal I", "lesson_type": "letter", "target": "I", "sort_order": 3},
-            {"name": "Vogal O", "lesson_type": "letter", "target": "O", "sort_order": 4},
-            {"name": "Vogal U", "lesson_type": "letter", "target": "U", "sort_order": 5},
-            {"name": "Revisão de Vogais", "lesson_type": "review", "target": "AEIOU", "sort_order": 6},
+            {"name": "Vogal A", "lesson_type": "letter", "target": "A", "sort_order": 1, **get_lesson_image_fields("letter", "A")},
+            {"name": "Vogal E", "lesson_type": "letter", "target": "E", "sort_order": 2, **get_lesson_image_fields("letter", "E")},
+            {"name": "Vogal I", "lesson_type": "letter", "target": "I", "sort_order": 3, **get_lesson_image_fields("letter", "I")},
+            {"name": "Vogal O", "lesson_type": "letter", "target": "O", "sort_order": 4, **get_lesson_image_fields("letter", "O")},
+            {"name": "Vogal U", "lesson_type": "letter", "target": "U", "sort_order": 5, **get_lesson_image_fields("letter", "U")},
+            {"name": "Revisão de Vogais", "lesson_type": "review", "target": "AEIOU", "sort_order": 6, **CMS_DEFAULTS},
         ],
     },
     {
@@ -74,7 +109,7 @@ MODULES_DATA = [
         "description": "Aprenda as consoantes com imagens divertidas",
         "sort_order": 2,
         "lessons": [
-            {"name": f"Consoante {c}", "lesson_type": "letter", "target": c, "sort_order": i + 1}
+            {"name": f"Consoante {c}", "lesson_type": "letter", "target": c, "sort_order": i + 1, **get_lesson_image_fields("letter", c)}
             for i, c in enumerate(CONSONANTS)
         ],
     },
@@ -126,6 +161,7 @@ def generate_simple_syllables() -> list[dict]:
                 "lesson_type": "syllable",
                 "target": f"{c}{v}",
                 "sort_order": len(result) + 1,
+                **CMS_DEFAULTS,
             })
     return result
 
@@ -139,6 +175,7 @@ def generate_complex_syllables() -> list[dict]:
                 "lesson_type": "syllable",
                 "target": f"{pair}{v}",
                 "sort_order": len(result) + 1,
+                **CMS_DEFAULTS,
             })
     for i, (syl,) in enumerate(CVC_SYLLABLES_DATA):
         result.append({
@@ -146,6 +183,7 @@ def generate_complex_syllables() -> list[dict]:
             "lesson_type": "syllable",
             "target": syl,
             "sort_order": len(result) + 1,
+            **CMS_DEFAULTS,
         })
     return result
 
@@ -160,27 +198,28 @@ def generate_blending_words() -> list[dict]:
             "target": word,
             "content": content,
             "sort_order": i + 1,
+            **CMS_DEFAULTS,
         })
     return result
 
 
 def generate_words() -> list[dict]:
     return [
-        {"name": f"Palavra {w}", "lesson_type": "word", "target": w, "sort_order": i + 1}
+        {"name": f"Palavra {w}", "lesson_type": "word", "target": w, "sort_order": i + 1, **get_lesson_image_fields("word", w),}
         for i, w in enumerate(WORDS_DATA)
     ]
 
 
 def generate_phrases() -> list[dict]:
     return [
-        {"name": f"Frases: {p}", "lesson_type": "phrase", "target": p, "sort_order": i + 1}
+        {"name": f"Frases: {p}", "lesson_type": "phrase", "target": p, "sort_order": i + 1, **CMS_DEFAULTS}
         for i, p in enumerate(PHRASES_DATA)
     ]
 
 
 def generate_sentences() -> list[dict]:
     return [
-        {"name": f"Oração {i + 1}", "lesson_type": "sentence", "target": s, "sort_order": i + 1}
+        {"name": f"Oração {i + 1}", "lesson_type": "sentence", "target": s, "sort_order": i + 1, **CMS_DEFAULTS}
         for i, s in enumerate(SENTENCES_DATA)
     ]
 

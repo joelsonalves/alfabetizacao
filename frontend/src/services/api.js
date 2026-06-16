@@ -113,4 +113,19 @@ export const api = {
     emoji: (letter) => request(`/images/emoji/${letter}`),
     word: (word) => request(`/images/word/${word}`),
   },
+  featureFlags: {
+    list: () => request('/feature-flags'),
+  },
+  admin: {
+    listFlags: () => request('/admin/feature-flags'),
+    updateFlag: (key, data) => request(`/admin/feature-flags/${key}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    listModules: () => request('/admin/modules'),
+    createModule: (data) => request('/admin/modules', { method: 'POST', body: JSON.stringify(data) }),
+    updateModule: (id, data) => request(`/admin/modules/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteModule: (id) => request(`/admin/modules/${id}`, { method: 'DELETE' }),
+    listLessons: (params) => request(`/admin/lessons${params}`),
+    createLesson: (data) => request('/admin/lessons', { method: 'POST', body: JSON.stringify(data) }),
+    updateLesson: (id, data) => request(`/admin/lessons/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteLesson: (id) => request(`/admin/lessons/${id}`, { method: 'DELETE' }),
+  },
 }

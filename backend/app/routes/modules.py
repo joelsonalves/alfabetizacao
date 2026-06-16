@@ -20,7 +20,7 @@ def list_lessons(module_id: int, db: Session = Depends(get_db)):
     module = db.query(LearningModule).filter(LearningModule.id == module_id).first()
     if not module:
         raise HTTPException(status_code=404, detail="Module not found")
-    lessons = db.query(Lesson).filter(Lesson.module_id == module_id).order_by(Lesson.sort_order).all()
+    lessons = db.query(Lesson).filter(Lesson.module_id == module_id, Lesson.active == True).order_by(Lesson.sort_order).all()
     return [LessonResponse.model_validate(l) for l in lessons]
 
 

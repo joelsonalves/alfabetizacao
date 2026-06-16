@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import React from 'react'
 import Dashboard from '../pages/Dashboard'
+import { FeatureFlagsProvider } from '../context/FeatureFlagsContext'
 
 const mockNavigate = vi.fn()
 
@@ -32,6 +33,9 @@ vi.mock('../services/api', () => ({
     progress: {
       get: (...args) => mockProgressGet(...args),
     },
+    featureFlags: {
+      list: () => Promise.resolve([]),
+    },
   },
 }))
 
@@ -41,6 +45,21 @@ vi.mock('../hooks/useAuth', () => ({
   }),
 }))
 
+vi.mock('../hooks/useFeatureFlags', () => ({
+  useFeatureFlags: () => ({
+    isActive: () => true,
+    getBehavior: () => null,
+  }),
+}))
+
+function renderWithProviders(ui) {
+  return render(
+    <MemoryRouter>
+      <FeatureFlagsProvider>{ui}</FeatureFlagsProvider>
+    </MemoryRouter>
+  )
+}
+
 describe('Dashboard', () => {
   beforeEach(() => {
     mockNavigate.mockClear()
@@ -48,14 +67,14 @@ describe('Dashboard', () => {
   })
 
   it('renders user greeting', async () => {
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText(/Olá, Teste/)).toBeInTheDocument()
     })
   })
 
   it('renders modules', async () => {
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText('Vogais')).toBeInTheDocument()
     })
@@ -63,14 +82,14 @@ describe('Dashboard', () => {
   })
 
   it('renders user stats', async () => {
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText('Nv. 1')).toBeInTheDocument()
     })
   })
 
   it('navigates to first lesson when module clicked', async () => {
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText('Vogais')).toBeInTheDocument()
     })
@@ -81,7 +100,7 @@ describe('Dashboard', () => {
   })
 
   it('does not navigate when module has no lessons', async () => {
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText('Consoantes')).toBeInTheDocument()
     })
@@ -93,7 +112,7 @@ describe('Dashboard', () => {
 
   it('shows error message when progress fetch fails', async () => {
     mockProgressGet = vi.fn().mockRejectedValue(new Error('Erro de autenticação. Faça login novamente.'))
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText(/Erro de autenticação/)).toBeInTheDocument()
     })
@@ -101,7 +120,7 @@ describe('Dashboard', () => {
 
   it('renders modules even when progress fetch fails', async () => {
     mockProgressGet = vi.fn().mockRejectedValue(new Error('Erro de autenticação'))
-    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    renderWithProviders(<Dashboard />)
     await waitFor(() => {
       expect(screen.getByText('Vogais')).toBeInTheDocument()
     })

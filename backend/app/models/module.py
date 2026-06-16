@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, JSON, ForeignKey
 from app.database import Base
 
 
@@ -22,6 +22,11 @@ class Lesson(Base):
     target = Column(String(100), nullable=False)
     content = Column(JSON, nullable=True)
     sort_order = Column(Integer, nullable=False)
+    active = Column(Boolean, default=True)
+    image_url = Column(String(500), nullable=True)
+    image_active = Column(Boolean, default=True)
+    alt_text = Column(String(500), nullable=True)
+    placeholder_text = Column(String(500), nullable=True)
 
 
 class LessonImage(Base):

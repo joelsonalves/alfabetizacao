@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
+import { useFeatureFlags } from '../hooks/useFeatureFlags'
 import { MODULE_ICONS } from '../constants/modules'
 import { buildProgressMap } from '../utils/progress'
 import './Dashboard.css'
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [progressError, setProgressError] = useState(null)
   const { user } = useAuth()
+  const { isActive } = useFeatureFlags()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -37,6 +39,11 @@ export default function Dashboard() {
 
   if (loading) return <div className="loading">Carregando...</div>
 
+  const visibleModules = modules.filter(mod => {
+    const flagKey = `dashboard_module_${mod.module_type}`
+    return isActive(flagKey)
+  })
+
   return (
     <div className="dashboard fade-in">
       <div className="dashboard-header">
@@ -61,7 +68,7 @@ export default function Dashboard() {
       )}
 
       <div className="module-grid">
-        {modules.map((mod, idx) => {
+        {visibleModules.map((mod, idx) => {
           const modLessons = mod.lessons?.length || 0
           const modCompleted = 0
           const icon = MODULE_ICONS[mod.module_type] || '📘'

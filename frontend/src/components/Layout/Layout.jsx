@@ -33,6 +33,7 @@ export default function Layout({ children }) {
               <Link to="/dashboard" className="nav-link" aria-label="Ir para o Início">🏠 Início</Link>
               <Link to="/profile" className="nav-link" aria-label="Ver Perfil">👤 Perfil</Link>
               <Link to="/tutorial" className="nav-link" aria-label="Ajuda">❓ Ajuda</Link>
+              {user.is_admin && <Link to="/admin" className="nav-link" aria-label="Administração">⚙️ Admin</Link>}
               <div className="nav-user">
                 <span className="nav-xp">⭐ {user.xp} XP</span>
                 <span className="nav-level">Nv. {user.level}</span>

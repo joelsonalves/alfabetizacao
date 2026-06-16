@@ -7,7 +7,10 @@ import Dashboard from './pages/Dashboard'
 import Lesson from './pages/Lesson'
 import Tutorial from './pages/Tutorial'
 import Profile from './pages/Profile'
+import Admin from './pages/Admin'
 import { useAuth } from './hooks/useAuth'
+import { FeatureFlagsProvider } from './context/FeatureFlagsContext'
+import AdminRoute from './components/AdminRoute/AdminRoute'
 
 if (import.meta.env.DEV) {
   import('@axe-core/react').then(axe => {
@@ -24,24 +27,29 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <Layout>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/tutorial" element={
-          <ProtectedRoute><Tutorial /></ProtectedRoute>
-        } />
-        <Route path="/dashboard" element={
-          <ProtectedRoute><Dashboard /></ProtectedRoute>
-        } />
-        <Route path="/lesson/:moduleId/:lessonId" element={
-          <ProtectedRoute><Lesson /></ProtectedRoute>
-        } />
-        <Route path="/profile" element={
-          <ProtectedRoute><Profile /></ProtectedRoute>
-        } />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Layout>
+    <FeatureFlagsProvider>
+      <Layout>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/tutorial" element={
+            <ProtectedRoute><Tutorial /></ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute><Dashboard /></ProtectedRoute>
+          } />
+          <Route path="/lesson/:moduleId/:lessonId" element={
+            <ProtectedRoute><Lesson /></ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute><Profile /></ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute><AdminRoute><Admin /></AdminRoute></ProtectedRoute>
+          } />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </Layout>
+    </FeatureFlagsProvider>
   )
 }

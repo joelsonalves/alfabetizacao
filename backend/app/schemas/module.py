@@ -15,6 +15,19 @@ class ModuleResponse(BaseModel):
         from_attributes = True
 
 
+class ModuleCreate(BaseModel):
+    name: str
+    module_type: str
+    description: str | None = None
+    sort_order: int
+
+
+class ModuleUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    sort_order: int | None = None
+
+
 class LessonResponse(BaseModel):
     id: int
     module_id: int
@@ -23,9 +36,41 @@ class LessonResponse(BaseModel):
     target: str
     content: Any
     sort_order: int
+    active: bool = True
+    image_url: str | None = None
+    image_active: bool = True
+    alt_text: str | None = None
+    placeholder_text: str | None = None
 
     class Config:
         from_attributes = True
+
+
+class LessonCreate(BaseModel):
+    name: str
+    lesson_type: str
+    target: str
+    content: Any = None
+    sort_order: int
+    module_id: int
+    active: bool = True
+    image_url: str | None = None
+    image_active: bool = True
+    alt_text: str | None = None
+    placeholder_text: str | None = None
+
+
+class LessonUpdate(BaseModel):
+    name: str | None = None
+    lesson_type: str | None = None
+    target: str | None = None
+    content: Any = None
+    sort_order: int | None = None
+    active: bool | None = None
+    image_url: str | None = None
+    image_active: bool | None = None
+    alt_text: str | None = None
+    placeholder_text: str | None = None
 
 
 class ProgressUpdate(BaseModel):

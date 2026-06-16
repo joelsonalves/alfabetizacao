@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.user import User, TokenBlocklist
+from app.models.user import User, TokenBlocklist, FeatureFlag
 from app.schemas.user import UserRegister, UserLogin, UserResponse, TokenResponse, RefreshRequest, LogoutResponse
 from app.services.auth import hash_password, verify_password, create_access_token, create_refresh_token, decode_access_token, validate_password, update_login_streak, revoke_token
 from app.services.cleanup import clean_expired_blocklist_sync
@@ -40,6 +40,13 @@ def get_current_user(authorization: str = Header(default=None), db: Session = De
     return user
 
 
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    if not user.is_admin:
+        logger.warning("403: user %s is not admin", user.id)
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
 @router.post("/register", response_model=TokenResponse, status_code=201)
 def register(data: UserRegister, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
@@ -58,8 +65,8 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
-    refresh_token = create_refresh_token({"sub": user.id, "email": user.email})
+    access_token = create_access_token({"sub": user.id, "email": user.email, "is_admin": user.is_admin}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
+    refresh_token = create_refresh_token({"sub": user.id, "email": user.email, "is_admin": user.is_admin})
     return TokenResponse(access_token=access_token, refresh_token=refresh_token, user=UserResponse.model_validate(user))
 
 
@@ -74,8 +81,8 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
     update_login_streak(user, today)
     db.commit()
 
-    access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
-    refresh_token = create_refresh_token({"sub": user.id, "email": user.email})
+    access_token = create_access_token({"sub": user.id, "email": user.email, "is_admin": user.is_admin}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
+    refresh_token = create_refresh_token({"sub": user.id, "email": user.email, "is_admin": user.is_admin})
     return TokenResponse(access_token=access_token, refresh_token=refresh_token, user=UserResponse.model_validate(user))
 
 
@@ -100,8 +107,8 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == int(payload.get("sub"))).first()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
-    new_access = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
-    new_refresh = create_refresh_token({"sub": user.id, "email": user.email})
+    new_access = create_access_token({"sub": user.id, "email": user.email, "is_admin": user.is_admin}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
+    new_refresh = create_refresh_token({"sub": user.id, "email": user.email, "is_admin": user.is_admin})
     return TokenResponse(access_token=new_access, refresh_token=new_refresh, user=UserResponse.model_validate(user))
 
 

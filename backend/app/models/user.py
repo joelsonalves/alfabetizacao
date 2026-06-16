@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey
 from app.database import Base
 
 
@@ -15,8 +15,19 @@ class User(Base):
     streak = Column(Integer, default=0)
     last_active_date = Column(DateTime, nullable=True)
     tutorial_completed = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class FeatureFlag(Base):
+    __tablename__ = "feature_flags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(100), unique=True, nullable=False, index=True)
+    active = Column(Boolean, default=True)
+    behavior_on_inactive = Column(String(50), default="hide")
+    description = Column(Text, nullable=True)
 
 
 class TokenBlocklist(Base):
