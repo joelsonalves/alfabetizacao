@@ -7,9 +7,10 @@ import { useKeyboard } from '../hooks/useKeyboard'
 import { useAuth } from '../hooks/useAuth'
 import VirtualKeyboard from '../components/VirtualKeyboard/VirtualKeyboard'
 import LevelUp from '../components/LevelUp/LevelUp'
+import SyllableBlending from '../components/SyllableBlending/SyllableBlending'
 import './Lesson.css'
 
-const POINTS = { letter: 10, syllable: 25, word: 50, phrase: 100, sentence: 100 }
+const POINTS = { letter: 10, syllable: 25, word: 50, blending: 60, phrase: 100, sentence: 100 }
 
 const SPEECH_PREFIXES = [
   'LETRA ', 'A LETRA ', 'O SOM DE ', 'SOM DE ', 'SOM DA ', 'O SOM DA ',
@@ -31,8 +32,19 @@ const SPEECH_TYPE_NAMES = {
   consonant: 'letra',
   syllable: 'sílaba',
   word: 'palavra',
+  blending: 'palavra',
   phrase: 'frase',
   sentence: 'frase',
+}
+
+const SPEECH_TIMEOUTS = {
+  letter: 4000,
+  consonant: 4000,
+  syllable: 6000,
+  word: 8000,
+  blending: 20000,
+  phrase: 20000,
+  sentence: 20000,
 }
 
 export default function Lesson() {
@@ -57,6 +69,7 @@ export default function Lesson() {
   const [hasSpoken, setHasSpoken] = useState(false)
   const [moduleLessons, setModuleLessons] = useState([])
   const [moduleCompletedLessons, setModuleCompletedLessons] = useState(new Set())
+  const [blendingCompleted, setBlendingCompleted] = useState(false)
 
   const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported, isSpeaking } = useSpeech()
   const { isListening, supported: srSupported, startListening, stopListening } = useSpeechRecognition()
@@ -67,6 +80,10 @@ export default function Lesson() {
   const addFeedback = useCallback((type, message) => {
     const id = ++feedbackIdRef.current
     setFeedbacks(prev => [...prev.slice(-4), { id, type, message }])
+  }, [])
+
+  const handleBlendingComplete = useCallback(() => {
+    setBlendingCompleted(true)
   }, [])
 
   const lessonRef = useRef(lesson)
@@ -90,7 +107,9 @@ export default function Lesson() {
 
   const prevTypedChars = useRef('')
 
-  const canComplete = kb.completed && (!srSupported || !ttsSupported || (hasListened && hasSpoken))
+  const canComplete = lesson?.lesson_type === 'blending'
+    ? blendingCompleted
+    : (kb.completed && (!srSupported || !ttsSupported || (hasListened && hasSpoken)))
 
   useEffect(() => {
     if (canComplete && !lessonCompleted) {
@@ -153,6 +172,7 @@ export default function Lesson() {
     setModuleCompletedLessons(new Set())
     setFeedbacks([])
     setRetryError(null)
+    setBlendingCompleted(false)
     prevTypedChars.current = ''
 
     Promise.all([
@@ -234,15 +254,6 @@ export default function Lesson() {
       ? target
       : normalized || transcript
     return { content, isCorrect }
-  }
-
-  const SPEECH_TIMEOUTS = {
-    letter: 4000,
-    consonant: 4000,
-    syllable: 6000,
-    word: 8000,
-    phrase: 20000,
-    sentence: 20000,
   }
 
   const handleSpeech = () => {
@@ -382,138 +393,144 @@ export default function Lesson() {
       )}
 
       <div className="lesson-content card">
-        <div className="lesson-target-area">
-          {imageData && (
-            <div className="lesson-image">
-              {imageData.type === 'emoji' ? (
-                <span className="lesson-emoji">{imageData.value}</span>
-              ) : (
-                <img src={imageData.url} alt={imageData.alt || lesson.target} className="lesson-real-image" />
+        {lesson.lesson_type === 'blending' ? (
+          <SyllableBlending lesson={lesson} onComplete={handleBlendingComplete} />
+        ) : (
+          <>
+            <div className="lesson-target-area">
+              {imageData && (
+                <div className="lesson-image">
+                  {imageData.type === 'emoji' ? (
+                    <span className="lesson-emoji">{imageData.value}</span>
+                  ) : (
+                    <img src={imageData.url} alt={imageData.alt || lesson.target} className="lesson-real-image" />
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          <div className="lesson-target-display">
-            {lesson.lesson_type === 'letter' || lesson.lesson_type === 'syllable' ? (
-              <span className={`target-char ${showResult ? 'target-done' : ''}`}>
-                {displayChar}
-              </span>
-            ) : (
-              <div className="target-word">
-                {displayChar.split('').map((ch, i) => (
-                  <span
-                    key={i}
-                    className={`target-letter ${i < kb.typedChars.length ? 'typed' : ''} ${i === kb.typedChars.length ? 'current' : ''}`}
-                  >
-                    {ch === ' ' ? '\u00A0' : ch}
+              <div className="lesson-target-display">
+                {lesson.lesson_type === 'letter' || lesson.lesson_type === 'syllable' ? (
+                  <span className={`target-char ${showResult ? 'target-done' : ''}`}>
+                    {displayChar}
                   </span>
-                ))}
+                ) : (
+                  <div className="target-word">
+                    {displayChar.split('').map((ch, i) => (
+                      <span
+                        key={i}
+                        className={`target-letter ${i < kb.typedChars.length ? 'typed' : ''} ${i === kb.typedChars.length ? 'current' : ''}`}
+                      >
+                        {ch === ' ' ? '\u00A0' : ch}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className="lesson-typed">
-            {kb.typedChars}
-          </div>
-          {kb.lastWrongKey && (
-            <div className="typing-error">
-              ❌ Você digitou: <strong>{kb.lastWrongKey}</strong> (esperado: <strong>{kb.getExpectedChar()}</strong>)
-            </div>
-          )}
+              <div className="lesson-typed">
+                {kb.typedChars}
+              </div>
+              {kb.lastWrongKey && (
+                <div className="typing-error">
+                  ❌ Você digitou: <strong>{kb.lastWrongKey}</strong> (esperado: <strong>{kb.getExpectedChar()}</strong>)
+                </div>
+              )}
 
-          <div className="progress-checklist">
-            <div className={`checklist-item ${hasListened ? 'done' : ''}`}>
-              <span className="checklist-icon">{hasListened ? '✅' : '❌'}</span>
-              <span className="checklist-label">Ouvir</span>
-              <span className="checklist-desc">"{lesson.lesson_type === 'review'
-                ? lesson.target.split('').join(' ')
-                : lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
-                  ? `${lesson.target} → de ${(LETTER_WORDS[lesson.target?.toUpperCase()] || lesson.target).replace(/^./, m => m.toUpperCase())}`
-                  : lesson.target}"</span>
-            </div>
-            <div className={`checklist-item ${speechCorrect ? 'done' : ''}`}>
-              <span className="checklist-icon">{speechCorrect ? '✅' : '❌'}</span>
-              <span className="checklist-label">Falar</span>
-              <span className="checklist-desc">Fale: {lesson.target}</span>
-            </div>
-            <div className={`checklist-item ${kb.typedChars?.length >= (lesson?.target?.length || 0) ? 'done' : ''}`}>
-              <span className="checklist-icon">{kb.typedChars?.length >= (lesson?.target?.length || 0) ? '✅' : '❌'}</span>
-              <span className="checklist-label">Teclar</span>
-              <span className="checklist-desc">Digite o que está na tela</span>
-            </div>
-          </div>
+              <div className="progress-checklist">
+                <div className={`checklist-item ${hasListened ? 'done' : ''}`}>
+                  <span className="checklist-icon">{hasListened ? '✅' : '❌'}</span>
+                  <span className="checklist-label">Ouvir</span>
+                  <span className="checklist-desc">"{lesson.lesson_type === 'review'
+                    ? lesson.target.split('').join(' ')
+                    : lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
+                      ? `${lesson.target} → de ${(LETTER_WORDS[lesson.target?.toUpperCase()] || lesson.target).replace(/^./, m => m.toUpperCase())}`
+                      : lesson.target}"</span>
+                </div>
+                <div className={`checklist-item ${speechCorrect ? 'done' : ''}`}>
+                  <span className="checklist-icon">{speechCorrect ? '✅' : '❌'}</span>
+                  <span className="checklist-label">Falar</span>
+                  <span className="checklist-desc">Fale: {lesson.target}</span>
+                </div>
+                <div className={`checklist-item ${kb.typedChars?.length >= (lesson?.target?.length || 0) ? 'done' : ''}`}>
+                  <span className="checklist-icon">{kb.typedChars?.length >= (lesson?.target?.length || 0) ? '✅' : '❌'}</span>
+                  <span className="checklist-label">Teclar</span>
+                  <span className="checklist-desc">Digite o que está na tela</span>
+                </div>
+              </div>
 
-          {srSupported && (
-            <div className="speech-actions">
-              {ttsSupported && (
-                <button
-                  className="btn btn-ghost listen-btn"
-                  onClick={() => {
-                    setHasListened(true)
-                    if (lesson.lesson_type === 'review') {
-                      const sentence = lesson.target.split('').map(ch => {
-                        const upper = ch.toUpperCase()
-                        const word = LETTER_WORDS[upper]
-                        if (word) {
-                          const capitalized = word.charAt(0).toUpperCase() + word.slice(1)
-                          return `${upper} de ${capitalized}`
+              {srSupported && (
+                <div className="speech-actions">
+                  {ttsSupported && (
+                    <button
+                      className="btn btn-ghost listen-btn"
+                      onClick={() => {
+                        setHasListened(true)
+                        if (lesson.lesson_type === 'review') {
+                          const sentence = lesson.target.split('').map(ch => {
+                            const upper = ch.toUpperCase()
+                            const word = LETTER_WORDS[upper]
+                            if (word) {
+                              const capitalized = word.charAt(0).toUpperCase() + word.slice(1)
+                              return `${upper} de ${capitalized}`
+                            }
+                            return upper
+                          }).join('. ') + '.'
+                          speak(sentence)
+                        } else if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
+                          speakLetterWithWord(lesson.target)
+                        } else {
+                          speakWord(lesson.target)
                         }
-                        return upper
-                      }).join('. ') + '.'
-                      speak(sentence)
-                    } else if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
-                      speakLetterWithWord(lesson.target)
-                    } else {
-                      speakWord(lesson.target)
-                    }
-                  }}
-                  disabled={isSpeaking}
-                  aria-label={`Ouvir pronúncia de ${lesson?.target || ''}`}
-                >
-                  <>🔊 Ouvir <span className="speech-badge">1</span></>
-                </button>
+                      }}
+                      disabled={isSpeaking}
+                      aria-label={`Ouvir pronúncia de ${lesson?.target || ''}`}
+                    >
+                      <>🔊 Ouvir <span className="speech-badge">1</span></>
+                    </button>
+                  )}
+                  <button
+                    className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
+                    onClick={handleSpeech}
+                    disabled={isSpeaking}
+                    aria-label={isListening ? 'Terminei de ler' : `Ler em voz alta ${lesson?.target || ''}`}
+                  >
+                    {isListening ? <>🛑 Terminei de ler <span className="speech-badge">2</span></> : <>🎤 Ler em voz alta <span className="speech-badge">2</span></>}
+                  </button>
+                </div>
               )}
-              <button
-                className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
-                onClick={handleSpeech}
-                disabled={isSpeaking}
-                aria-label={isListening ? 'Terminei de ler' : `Ler em voz alta ${lesson?.target || ''}`}
-              >
-                {isListening ? <>🛑 Terminei de ler <span className="speech-badge">2</span></> : <>🎤 Ler em voz alta <span className="speech-badge">2</span></>}
-              </button>
-            </div>
-          )}
-          {speechNoResult && (
-            <div className="speech-noresult">
-              🎤 Não entendi. Tente dizer: <strong>{(SPEECH_TYPE_LABELS[lesson?.lesson_type] || '') + ' ' + (lesson?.target || '')}</strong>
-            </div>
-          )}
-          {speechResult && (
-            <div className={`speech-result ${speechCorrect ? 'speech-correct' : 'speech-incorrect'}`}>
-              {speechCorrect ? '✅' : '❌'} Você disse: <strong>{speechResult}</strong>
-              {!speechCorrect && (
-                <span className="speech-expected"> (esperado: {speechExpected})</span>
+              {speechNoResult && (
+                <div className="speech-noresult">
+                  🎤 Não entendi. Tente dizer: <strong>{(SPEECH_TYPE_LABELS[lesson?.lesson_type] || '') + ' ' + (lesson?.target || '')}</strong>
+                </div>
               )}
-              {!speechCorrect && (
-                <div className="speech-suggestion">💡 Tente falar só a {SPEECH_TYPE_NAMES[lesson?.lesson_type] || 'letra'}: <strong>{speechExpected}</strong></div>
+              {speechResult && (
+                <div className={`speech-result ${speechCorrect ? 'speech-correct' : 'speech-incorrect'}`}>
+                  {speechCorrect ? '✅' : '❌'} Você disse: <strong>{speechResult}</strong>
+                  {!speechCorrect && (
+                    <span className="speech-expected"> (esperado: {speechExpected})</span>
+                  )}
+                  {!speechCorrect && (
+                    <div className="speech-suggestion">💡 Tente falar só a {SPEECH_TYPE_NAMES[lesson?.lesson_type] || 'letra'}: <strong>{speechExpected}</strong></div>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
 
-        <div className="feedback-list" aria-live="polite" aria-relevant="additions">
-          {feedbacks.map(fb => (
-            <div key={fb.id} className={`feedback-item feedback-${fb.type}`}>
-              {fb.message}
+            <div className="feedback-list" aria-live="polite" aria-relevant="additions">
+              {feedbacks.map(fb => (
+                <div key={fb.id} className={`feedback-item feedback-${fb.type}`}>
+                  {fb.message}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <VirtualKeyboard
-          pressedKey={kb.pressedKey}
-          onKeyClick={kb.handleVirtualKeyClick}
-          disabled={showResult}
-        />
+            <VirtualKeyboard
+              pressedKey={kb.pressedKey}
+              onKeyClick={kb.handleVirtualKeyClick}
+              disabled={showResult}
+            />
+          </>
+        )}
       </div>
 
       {showResult && (

@@ -1,6 +1,7 @@
 """Seed the database with learning modules and lessons."""
 from app.database import SessionLocal
 from app.models.module import LearningModule, Lesson
+import json
 
 LEVELS = [
     {
@@ -61,24 +62,31 @@ LEVELS = [
         "lessons": [],
     },
     {
+        "name": "Montagem Silábica",
+        "module_type": "blending",
+        "description": "Junte sílabas para formar palavras completas",
+        "sort_order": 5,
+        "lessons": [],
+    },
+    {
         "name": "Palavras",
         "module_type": "word",
         "description": "Forme palavras completas com 2 a 3 sílabas",
-        "sort_order": 5,
+        "sort_order": 6,
         "lessons": [],
     },
     {
         "name": "Frases",
         "module_type": "phrase",
         "description": "Monte frases curtas e complete seu pensamento",
-        "sort_order": 6,
+        "sort_order": 7,
         "lessons": [],
     },
     {
         "name": "Orações",
         "module_type": "sentence",
         "description": "Escreva orações completas e leia com fluência",
-        "sort_order": 7,
+        "sort_order": 8,
         "lessons": [],
     },
 ]
@@ -144,7 +152,27 @@ def seed():
         complex_syllables.extend(cvc_syllables)
         LEVELS[3]["lessons"] = complex_syllables
 
-        # Level 5: Words
+        # Level 5: Montagem Silábica (blending)
+        blending_words = [
+            {"name": "Montar CASA", "lesson_type": "blending", "target": "CASA", "content": {"syllables": ["CA", "SA"], "word": "CASA"}},
+            {"name": "Montar BOLA", "lesson_type": "blending", "target": "BOLA", "content": {"syllables": ["BO", "LA"], "word": "BOLA"}},
+            {"name": "Montar GATO", "lesson_type": "blending", "target": "GATO", "content": {"syllables": ["GA", "TO"], "word": "GATO"}},
+            {"name": "Montar DADO", "lesson_type": "blending", "target": "DADO", "content": {"syllables": ["DA", "DO"], "word": "DADO"}},
+            {"name": "Montar RATO", "lesson_type": "blending", "target": "RATO", "content": {"syllables": ["RA", "TO"], "word": "RATO"}},
+            {"name": "Montar SAPO", "lesson_type": "blending", "target": "SAPO", "content": {"syllables": ["SA", "PO"], "word": "SAPO"}},
+            {"name": "Montar PATO", "lesson_type": "blending", "target": "PATO", "content": {"syllables": ["PA", "TO"], "word": "PATO"}},
+            {"name": "Montar FOCA", "lesson_type": "blending", "target": "FOCA", "content": {"syllables": ["FO", "CA"], "word": "FOCA"}},
+            {"name": "Montar BALA", "lesson_type": "blending", "target": "BALA", "content": {"syllables": ["BA", "LA"], "word": "BALA"}},
+            {"name": "Montar PRATO", "lesson_type": "blending", "target": "PRATO", "content": {"syllables": ["PRA", "TO"], "word": "PRATO"}},
+            {"name": "Montar JANELA", "lesson_type": "blending", "target": "JANELA", "content": {"syllables": ["JA", "NE", "LA"], "word": "JANELA"}},
+            {"name": "Montar CAVALO", "lesson_type": "blending", "target": "CAVALO", "content": {"syllables": ["CA", "VA", "LO"], "word": "CAVALO"}},
+        ]
+        for i, w in enumerate(blending_words):
+            w["sort_order"] = i + 1
+            w["content"] = json.dumps(w["content"])
+        LEVELS[4]["lessons"] = blending_words
+
+        # Level 6: Words
         words = [
             {"name": "Palavra CASA", "lesson_type": "word", "target": "CASA"},
             {"name": "Palavra BOLA", "lesson_type": "word", "target": "BOLA"},
@@ -169,9 +197,9 @@ def seed():
         ]
         for i, w in enumerate(words):
             w["sort_order"] = i + 1
-        LEVELS[4]["lessons"] = words
+        LEVELS[5]["lessons"] = words
 
-        # Level 6: Phrases
+        # Level 7: Phrases
         phrases = [
             {"name": "Frases: O GATO BEBE", "lesson_type": "phrase", "target": "O GATO BEBE"},
             {"name": "Frases: A BOLA ROLA", "lesson_type": "phrase", "target": "A BOLA ROLA"},
@@ -184,9 +212,9 @@ def seed():
         ]
         for i, p in enumerate(phrases):
             p["sort_order"] = i + 1
-        LEVELS[5]["lessons"] = phrases
+        LEVELS[6]["lessons"] = phrases
 
-        # Level 7: Sentences
+        # Level 8: Sentences
         sentences = [
             {"name": "Oração 1", "lesson_type": "sentence", "target": "O GATO BEBEU LEITE."},
             {"name": "Oração 2", "lesson_type": "sentence", "target": "A CASA TEM UMA PORTA VERMELHA."},
@@ -199,7 +227,7 @@ def seed():
         ]
         for i, s in enumerate(sentences):
             s["sort_order"] = i + 1
-        LEVELS[6]["lessons"] = sentences
+        LEVELS[7]["lessons"] = sentences
 
         for level_data in LEVELS:
             lessons = level_data.pop("lessons")
