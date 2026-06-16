@@ -7,7 +7,9 @@ O `stopListening` já existe no hook, mas não é destruturado no Lesson e, quan
 ## Goals / Non-Goals
 
 **Goals:**
-- Botão único de microfone alterna entre "🎤 Ler em voz alta..." e "🛑 Terminei de ler"
+- Botão único de microfone alterna entre `🎤 Ler em voz alta` e `🛑 Terminei de ler`
+- Badge numerado `[1]` e `[2]` nos botões para indicar sequência
+- Botões com mesmo tamanho, borda visível e hover consistente
 - Ao clicar "Terminei de ler", o reconhecimento para sem disparar mensagem de erro
 - Timeout de segurança maior para `sentence`/`phrase` (20s) e ajustado para os demais tipos
 - Toggle implementado exclusivamente via estado `isListening` do hook — sem novo estado no Lesson
@@ -50,6 +52,24 @@ Quando o usuário clica "Terminei de ler":
 5. Se `!hasResult && !manualStopRef.current` → chama `onNoResult` (timeout, comportamento existente)
 
 **Alternativa rejeitada**: Passar um parâmetro `silent` para `stopListening()`. Funciona, mas exigiria modificar a assinatura da função. Uma ref interna é mais limpa.
+
+### Decisão 5: Badge numerado nos botões para indicar sequência
+
+Os botões "Ouvir" e "Ler em voz alta" recebem um badge circular com `[1]` e `[2]` respectivamente. O badge é um `<span>` estilizado com `border-radius: 50%`, fundo `--color-primary` e texto branco. O `[2]` persiste em ambos os estados do toggle ("Ler em voz alta" e "Terminei de ler") porque é o mesmo botão.
+
+**Rationale**: O número dá ao usuário a percepção de que "primeiro ouça, depois fale" — uma sequência pedagógica que já existia no checklist mas agora fica visível nos botões.
+
+### Decisão 6: Botões com largura mínima e borda uniforme
+
+Ambos os botões em `.speech-actions` recebem `min-width: 200px` e `padding: 10px 20px`. O `.btn-ghost` (Ouvir) ganha `border: 1px solid var(--border-color)` para ter a mesma aparência de botão do `.btn-secondary` (Ler). O hover do `.btn-ghost` usa `background: var(--bg-primary)` para igualar ao hover do `.btn-secondary`.
+
+**Rationale**: Sem borda, o botão Ouvir parecia um link em vez de botão, causando desalinhamento visual com o botão Ler em voz alta.
+
+### Decisão 7: `🎤 Ler em voz alta` sem reticências
+
+O texto do botão foi alterado de `"🎤 Ler em voz alta..."` para `"🎤 Ler em voz alta"` (sem reticências).
+
+**Rationale**: As reticências sugeriam carregamento ou ação pendente. Como o botão é um comando direto ("clique para começar a falar"), o texto sem reticências é mais limpo e assertivo. Coerente com o padrão de outros apps de áudio (WhatsApp, Telegram) que usam "Gravar" sem reticências.
 
 ### Decisão 4: `interimResults` permanece `false`
 

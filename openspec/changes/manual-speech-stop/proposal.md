@@ -4,7 +4,9 @@ O timeout fixo de 4 segundos no reconhecimento de fala é insuficiente para fras
 
 ## What Changes
 
-- Botão de microfone existente passa a alternar entre **"🎤 Ler em voz alta..."** (pronto) e **"🛑 Terminei de ler"** (ouvindo), substituindo o estado disabled atual
+- Botão de microfone existente passa a alternar entre **`🎤 Ler em voz alta`** (pronto) e **`🛑 Terminei de ler`** (ouvindo), substituindo o estado disabled atual
+- Badge numerado `[1]` e `[2]` ao lado dos botões para indicar sequência (Ouvir é passo 1, Ler em voz alta é passo 2)
+- Ambos os botões têm o mesmo tamanho (`min-width: 200px`), borda visível e efeito hover consistente
 - O timeout de reconhecimento deixa de ser fixo e passa a ser configurável por tipo de lição: 20s para `sentence`/`phrase`, 4-8s para `letter`/`consonant`/`syllable`/`word`
 - Chamada manual de `stopListening()` não dispara `onNoResult` ("Não entendi") — o silêncio após clique manual é tratado como "voltar ao normal" sem erro
 - `useSpeechRecognition` passa a aceitar `timeoutMs` opcional em `startListening()` e suprime `onNoResult` quando a parada é manual
@@ -22,4 +24,6 @@ O timeout fixo de 4 segundos no reconhecimento de fala é insuficiente para fras
 - `frontend/src/hooks/useSpeechRecognition.js` — `startListening` ganha parâmetro `timeoutMs`; `stopListening` sinaliza parada manual para suprimir `onNoResult` no `onend`
 - `frontend/src/pages/Lesson.jsx` — botão toggle com texto dinâmico; `handleSpeech` bifurca entre start/stop; timeout calculado por `lesson.lesson_type`
 - `frontend/src/tests/useSpeechRecognition.test.js` — novos testes para timeout configurável e supressão de `onNoResult` na parada manual
-- `frontend/src/tests/Lesson.test.jsx` — mock do hook expõe `stopListening`; teste do toggle e do texto do botão
+- `frontend/src/pages/Lesson.css` — `.speech-actions` unificado com `min-width`; `.speech-badge` circular; `.btn-ghost` com borda e hover consistentes
+- `frontend/src/tests/useSpeechRecognition.test.js` — novos testes para timeout configurável, supressão de `onNoResult` na parada manual e timeout customizado
+- `frontend/src/tests/Lesson.test.jsx` — mock do hook expõe `stopListening`; testes do toggle, texto do botão sem reticências, timeout por tipo de lição
