@@ -120,6 +120,9 @@
 .speech-actions .btn-ghost {
   border: 1px solid var(--border-color);
 }
+.speech-actions .btn-ghost:hover {
+  background: var(--bg-primary);
+}
 .speech-badge {
   display: inline-flex;
   align-items: center;
