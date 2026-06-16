@@ -227,7 +227,7 @@ describe('Lesson page', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Ler em voz alta/ })).toBeInTheDocument()
     })
-    expect(screen.getByText('🎤 Ler em voz alta...')).toBeInTheDocument()
+    expect(screen.getByText('🎤 Ler em voz alta')).toBeInTheDocument()
   })
 
   it('shows "Terminei de ler" when listening and calls stopListening on click', async () => {
