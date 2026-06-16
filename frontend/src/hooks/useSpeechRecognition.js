@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 
-const SPEECH_TIMEOUT = 4000
+const DEFAULT_TIMEOUT = 4000
 const SR_LANG = import.meta.env.VITE_TTS_LANG || 'pt-BR'
 
 export function useSpeechRecognition() {
@@ -8,8 +8,10 @@ export function useSpeechRecognition() {
   const [supported, setSupported] = useState(true)
   const recognitionRef = useRef(null)
   const timeoutRef = useRef(null)
+  const manualStopRef = useRef(false)
 
-  const startListening = useCallback((onResult, onError, onNoResult) => {
+  const startListening = useCallback((onResult, onError, onNoResult, timeoutMs) => {
+    manualStopRef.current = false
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       setSupported(false)
@@ -40,7 +42,7 @@ export function useSpeechRecognition() {
 
     recognition.onend = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      if (!hasResult && onNoResult) onNoResult()
+      if (!hasResult && onNoResult && !manualStopRef.current) onNoResult()
       setIsListening(false)
     }
 
@@ -52,12 +54,13 @@ export function useSpeechRecognition() {
       if (!hasResult) {
         try { recognition.stop() } catch (e) {}
         setIsListening(false)
-        if (onNoResult) onNoResult()
+        if (onNoResult && !manualStopRef.current) onNoResult()
       }
-    }, SPEECH_TIMEOUT)
+    }, timeoutMs || DEFAULT_TIMEOUT)
   }, [])
 
   const stopListening = useCallback(() => {
+    manualStopRef.current = true
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     if (recognitionRef.current) {
       recognitionRef.current.stop()

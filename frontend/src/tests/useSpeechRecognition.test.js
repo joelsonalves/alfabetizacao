@@ -110,6 +110,46 @@ describe('useSpeechRecognition', () => {
     expect(onNoResult).toHaveBeenCalled()
   })
 
+  it('does not call onNoResult when stopListening is used', () => {
+    const { result } = renderHook(() => useSpeechRecognition())
+    const onNoResult = vi.fn()
+
+    let recognitionInstance
+    window.SpeechRecognition = class extends MockSpeechRecognition {
+      constructor() {
+        super()
+        recognitionInstance = this
+      }
+    }
+
+    act(() => { result.current.startListening(undefined, undefined, onNoResult) })
+    act(() => { result.current.stopListening() })
+    act(() => {
+      recognitionInstance.onend()
+    })
+
+    expect(onNoResult).not.toHaveBeenCalled()
+  })
+
+  it('uses custom timeout when provided', () => {
+    const { result } = renderHook(() => useSpeechRecognition())
+    const onNoResult = vi.fn()
+
+    act(() => { result.current.startListening(undefined, undefined, onNoResult, 20000) })
+
+    act(() => {
+      vi.advanceTimersByTime(4000)
+    })
+
+    expect(onNoResult).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(16000)
+    })
+
+    expect(onNoResult).toHaveBeenCalled()
+  })
+
   it('stopListening stops recognition', () => {
     const { result } = renderHook(() => useSpeechRecognition())
     act(() => { result.current.startListening() })

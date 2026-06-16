@@ -59,7 +59,7 @@ export default function Lesson() {
   const [moduleCompletedLessons, setModuleCompletedLessons] = useState(new Set())
 
   const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported, isSpeaking } = useSpeech()
-  const { isListening, supported: srSupported, startListening } = useSpeechRecognition()
+  const { isListening, supported: srSupported, startListening, stopListening } = useSpeechRecognition()
 
   const [feedbacks, setFeedbacks] = useState([])
   const feedbackIdRef = useRef(0)
@@ -236,8 +236,22 @@ export default function Lesson() {
     return { content, isCorrect }
   }
 
+  const SPEECH_TIMEOUTS = {
+    letter: 4000,
+    consonant: 4000,
+    syllable: 6000,
+    word: 8000,
+    phrase: 20000,
+    sentence: 20000,
+  }
+
   const handleSpeech = () => {
+    if (isListening) {
+      stopListening()
+      return
+    }
     setSpeechNoResult(false)
+    const timeout = SPEECH_TIMEOUTS[lesson?.lesson_type] || 4000
     startListening(
       (transcript) => {
         setSpeechNoResult(false)
@@ -284,6 +298,7 @@ export default function Lesson() {
         setSpeechNoResult(true)
         addFeedback('speech', 'Não entendi. Tente novamente.')
       },
+      timeout,
     )
   }
 
@@ -461,10 +476,10 @@ export default function Lesson() {
               <button
                 className={`btn ${isListening ? 'btn-accent' : 'btn-secondary'} speech-btn`}
                 onClick={handleSpeech}
-                disabled={isListening || isSpeaking}
-                aria-label={`Falar ${lesson?.target || ''}`}
+                disabled={isSpeaking}
+                aria-label={isListening ? 'Terminei de ler' : `Ler em voz alta ${lesson?.target || ''}`}
               >
-                🎤 {isListening ? `Ouvindo: ${lesson?.target || ''}...` : `Fale: ${lesson?.target || ''}`}
+                {isListening ? '🛑 Terminei de ler' : '🎤 Ler em voz alta...'}
               </button>
             </div>
           )}

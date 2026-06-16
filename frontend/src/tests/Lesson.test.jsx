@@ -47,11 +47,16 @@ vi.mock('../hooks/useSpeech', () => ({
   LETTER_WORDS: { A: 'Abelha' },
 }))
 
+let mockIsListening = false
+const mockStartListening = vi.fn((onResult) => { onResult('A') })
+const mockStopListening = vi.fn()
+
 vi.mock('../hooks/useSpeechRecognition', () => ({
   useSpeechRecognition: () => ({
-    isListening: false,
+    isListening: mockIsListening,
     supported: true,
-    startListening: vi.fn((onResult) => { onResult('A') }),
+    startListening: mockStartListening,
+    stopListening: mockStopListening,
   }),
 }))
 
@@ -66,6 +71,9 @@ describe('Lesson page', () => {
   beforeEach(() => {
     localStorage.clear()
     mockApiProgressUpdate.mockClear()
+    mockIsListening = false
+    mockStartListening.mockClear()
+    mockStopListening.mockClear()
   })
 
   it('renders lesson info', async () => {
@@ -128,7 +136,7 @@ describe('Lesson page', () => {
     })
 
     await user.click(screen.getByRole('button', { name: /Ouvir/ }))
-    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
     await waitFor(() => {
@@ -151,7 +159,7 @@ describe('Lesson page', () => {
     await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: /Ouvir/ }))
-    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
 
     await waitFor(() => {
@@ -174,7 +182,7 @@ describe('Lesson page', () => {
     await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: /Ouvir/ }))
-    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
 
     await waitFor(() => {
@@ -197,7 +205,7 @@ describe('Lesson page', () => {
 
     await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /Ouvir/ }))
-    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
 
     await waitFor(() => {
@@ -205,6 +213,96 @@ describe('Lesson page', () => {
     })
     const nextBtn = screen.getByText('Próxima Lição →').closest('button')
     expect(document.activeElement).toBe(nextBtn)
+  })
+
+  it('renders "Ler em voz alta..." button on load', async () => {
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Ler em voz alta/ })).toBeInTheDocument()
+    })
+    expect(screen.getByText('🎤 Ler em voz alta...')).toBeInTheDocument()
+  })
+
+  it('shows "Terminei de ler" when listening and calls stopListening on click', async () => {
+    mockIsListening = true
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('🛑 Terminei de ler')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /Terminei de ler/ }))
+    expect(mockStopListening).toHaveBeenCalled()
+  })
+
+  it('passes correct timeout for letter lessons', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Vogais')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
+    expect(mockStartListening).toHaveBeenCalled()
+    const lastCall = mockStartListening.mock.calls[0]
+    const timeoutArg = lastCall[3]
+    expect(timeoutArg).toBe(4000)
+  })
+
+  it('passes correct timeout for sentence lessons', async () => {
+    const sentenceLesson = {
+      id: 2, module_id: 1, name: 'Frase', lesson_type: 'sentence',
+      target: 'O GATO CORRE', content: null, sort_order: 2,
+    }
+
+    const { api } = await import('../services/api')
+    const origGetLesson = api.modules.getLesson
+    const origLessons = api.modules.lessons
+    api.modules.getLesson = () => Promise.resolve(sentenceLesson)
+    api.modules.lessons = () => Promise.resolve([sentenceLesson])
+
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/2']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Frase')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
+    expect(mockStartListening).toHaveBeenCalled()
+    const lastCall = mockStartListening.mock.calls[0]
+    const timeoutArg = lastCall[3]
+    expect(timeoutArg).toBe(20000)
+
+    api.modules.getLesson = origGetLesson
+    api.modules.lessons = origLessons
   })
 
   it('shows retry error on conflict', async () => {
@@ -222,7 +320,7 @@ describe('Lesson page', () => {
     await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: /Ouvir/ }))
-    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    await user.click(screen.getByRole('button', { name: /Ler em voz alta/ }))
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
 
     await waitFor(() => {
