@@ -97,8 +97,8 @@ app.include_router(modules.router, prefix="/api/modules", tags=["modules"])
 app.include_router(modules.lesson_router, prefix="/api", tags=["lessons"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 app.include_router(images.router, prefix="/api/images", tags=["images"])
-app.include_router(admin.router, prefix="/admin", tags=["admin"])
-app.include_router(admin_content.router, prefix="/admin", tags=["admin_content"])
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
+app.include_router(admin_content.router, prefix="/api/admin", tags=["admin_content"])
 app.include_router(feature_flags.router, prefix="/api/feature-flags", tags=["feature_flags"])
 
 
