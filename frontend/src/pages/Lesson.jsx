@@ -96,13 +96,10 @@ export default function Lesson() {
     if (canComplete && !lessonCompleted) {
       setLessonCompleted(true)
       const currentLesson = lessonRef.current
+      setModuleCompletedLessons(prev => new Set(prev).add(currentLesson.id))
       const points = (POINTS[currentLesson?.lesson_type] || 10) + speechScore
       const accuracy = kb.attempts > 0 ? Math.round(((kb.attempts - kb.errors) / kb.attempts) * 100) : 100
       const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
-
-      if (ttsSupported && currentLesson?.lesson_type === 'word') {
-        speakWord(currentLesson.target)
-      }
 
       setTimeout(() => {
         const prevLevel = user?.level || 1
@@ -154,6 +151,7 @@ export default function Lesson() {
     setHasSpoken(false)
     setModuleLessons([])
     setModuleCompletedLessons(new Set())
+    setFeedbacks([])
     setRetryError(null)
     prevTypedChars.current = ''
 
@@ -189,7 +187,15 @@ export default function Lesson() {
 
   const stripSpaces = (s) => s.replace(/\s+/g, '')
 
-  const tryExtractTarget = (transcript, target, sounds) => {
+  const isSubsequence = (targetWords, transcriptWords) => {
+    let ti = 0
+    for (const tw of transcriptWords) {
+      if (ti < targetWords.length && tw === targetWords[ti]) ti++
+    }
+    return ti === targetWords.length
+  }
+
+  const tryExtractTarget = (transcript, target, sounds, lesson_type) => {
     const normalized = normalize(transcript)
     const t = normalize(target)
 
@@ -201,7 +207,7 @@ export default function Lesson() {
     if (sounds.some(s => stripSpaces(normalized) === stripSpaces(normalize(s)))) return true
 
     for (const prefix of SPEECH_PREFIXES) {
-      const stripped = normalized.replace(normalize(prefix), '')
+      const stripped = normalized.replace(normalize(prefix), '').trim()
       if (stripped === t) return true
       if (sounds.some(s => stripped === normalize(s))) return true
     }
@@ -212,14 +218,28 @@ export default function Lesson() {
 
     if (normalized.endsWith(t)) return true
 
+    if (lesson_type === 'sentence' || lesson_type === 'phrase') {
+      const targetWords = t.split(/\s+/)
+      const transcriptWords = normalized.split(/\s+/)
+      if (isSubsequence(targetWords, transcriptWords)) return true
+    }
+
     return false
+  }
+
+  const extractSpokenContent = (transcript, target, sounds, lesson_type) => {
+    const isCorrect = tryExtractTarget(transcript, target, sounds, lesson_type)
+    const normalized = normalize(transcript)
+    const content = isCorrect
+      ? target
+      : normalized || transcript
+    return { content, isCorrect }
   }
 
   const handleSpeech = () => {
     setSpeechNoResult(false)
     startListening(
       (transcript) => {
-        setSpeechResult(transcript)
         setSpeechNoResult(false)
         const currentLesson = lessonRef.current
         if (!currentLesson) return
@@ -233,21 +253,24 @@ export default function Lesson() {
           if (sound) acceptedSounds.push(sound)
         }
 
-        const isCorrect = tryExtractTarget(transcript, target, acceptedSounds)
+        const { content, isCorrect } = extractSpokenContent(transcript, target, acceptedSounds, currentLesson.lesson_type)
+        setSpeechResult(content)
         setSpeechCorrect(isCorrect)
         setSpeechExpected(displayTarget)
 
         if (isCorrect) {
           setHasSpoken(true)
           setSpeechScore(s => s + 5)
-          addFeedback('speech', `Falou: ${transcript} ✅`)
+          addFeedback('speech', `Falou: ${content} ✅`)
           if (ttsSupported) {
-            speak(`Você falou ${transcript}. Parabéns!`)
+            const typeName = SPEECH_TYPE_NAMES[currentLesson?.lesson_type] || 'letra'
+            speak(`Muito bem! Você acertou a ${typeName} ${displayTarget}.`)
           }
         } else {
-          addFeedback('speech', `Falou: ${transcript} ❌ (esperado: ${displayTarget})`)
+          addFeedback('speech', `Falou: ${content} ❌ (esperado: ${displayTarget})`)
           if (ttsSupported) {
-            speak(`Você falou ${transcript}. Vamos tentar novamente!`)
+            const typeName = SPEECH_TYPE_NAMES[currentLesson?.lesson_type] || 'letra'
+            speak(`Quase! Tente novamente. A ${typeName} é ${displayTarget}.`)
           }
         }
       },
@@ -288,6 +311,13 @@ export default function Lesson() {
   }
 
   const currentLessonIdx = moduleLessons.findIndex(l => l.id === lesson?.id)
+  const nextBtnRef = useRef(null)
+
+  useEffect(() => {
+    if (showResult && !levelUp && nextBtnRef.current) {
+      nextBtnRef.current.focus()
+    }
+  }, [showResult, levelUp])
 
   if (loading) return <div className="loading">Carregando...</div>
   if (!lesson) return <div className="loading">Lição não encontrada</div>
@@ -486,7 +516,7 @@ export default function Lesson() {
               </span>
             </div>
           </div>
-          <button className="btn btn-primary" onClick={nextLesson}>
+          <button ref={nextBtnRef} className="btn btn-primary" onClick={nextLesson}>
             Próxima Lição →
           </button>
         </div>

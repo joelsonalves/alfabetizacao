@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import React from 'react'
@@ -133,6 +133,100 @@ describe('Lesson page', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
     await waitFor(() => {
       expect(mockApiProgressUpdate).toHaveBeenCalled()
+    })
+  })
+
+  it('displays lesson result on completion', async () => {
+    const user = userEvent.setup()
+    mockApiProgressUpdate.mockResolvedValue({ level: 1, xp: 50 })
+
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: /Ouvir/ }))
+    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('🎉 Lição Completa!')).toBeInTheDocument()
+    })
+  })
+
+  it('shows level up modal when level increases', async () => {
+    const user = userEvent.setup()
+    mockApiProgressUpdate.mockResolvedValue({ level: 2, xp: 50 })
+
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: /Ouvir/ }))
+    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('🎉 Lição Completa!')).toBeInTheDocument()
+    })
+    expect(screen.getByText(/Nível 2/)).toBeInTheDocument()
+  })
+
+  it('focuses next lesson button on completion', async () => {
+    const user = userEvent.setup()
+    mockApiProgressUpdate.mockResolvedValue({ level: 1, xp: 50 })
+
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: /Ouvir/ }))
+    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Próxima Lição →')).toBeInTheDocument()
+    })
+    const nextBtn = screen.getByText('Próxima Lição →').closest('button')
+    expect(document.activeElement).toBe(nextBtn)
+  })
+
+  it('shows retry error on conflict', async () => {
+    const user = userEvent.setup()
+    mockApiProgressUpdate.mockResolvedValue({ __conflict: true, detail: 'Conflict' })
+
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => expect(screen.getByText('Vogais')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: /Ouvir/ }))
+    await user.click(screen.getByRole('button', { name: /Falar/ }))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/Não foi possível salvar/)).toBeInTheDocument()
     })
   })
 })

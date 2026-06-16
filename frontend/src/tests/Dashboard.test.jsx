@@ -21,6 +21,8 @@ const mockLessons = [
   { id: 1, module_id: 1, name: 'Vogal A', lesson_type: 'letter', target: 'A', sort_order: 1 },
 ]
 
+let mockProgressGet = vi.fn().mockResolvedValue([])
+
 vi.mock('../services/api', () => ({
   api: {
     modules: {
@@ -28,7 +30,7 @@ vi.mock('../services/api', () => ({
       lessons: (id) => Promise.resolve(id === 1 ? mockLessons : []),
     },
     progress: {
-      get: () => Promise.resolve([]),
+      get: (...args) => mockProgressGet(...args),
     },
   },
 }))
@@ -42,6 +44,7 @@ vi.mock('../hooks/useAuth', () => ({
 describe('Dashboard', () => {
   beforeEach(() => {
     mockNavigate.mockClear()
+    mockProgressGet = vi.fn().mockResolvedValue([])
   })
 
   it('renders user greeting', async () => {
@@ -86,5 +89,22 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(mockNavigate).not.toHaveBeenCalled()
     })
+  })
+
+  it('shows error message when progress fetch fails', async () => {
+    mockProgressGet = vi.fn().mockRejectedValue(new Error('Erro de autenticação. Faça login novamente.'))
+    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    await waitFor(() => {
+      expect(screen.getByText(/Erro de autenticação/)).toBeInTheDocument()
+    })
+  })
+
+  it('renders modules even when progress fetch fails', async () => {
+    mockProgressGet = vi.fn().mockRejectedValue(new Error('Erro de autenticação'))
+    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    await waitFor(() => {
+      expect(screen.getByText('Vogais')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Consoantes')).toBeInTheDocument()
   })
 })

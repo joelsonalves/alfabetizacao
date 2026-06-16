@@ -16,9 +16,9 @@ if (import.meta.env.DEV) {
 }
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
   if (loading) return <div className="loading">Carregando...</div>
-  if (!user) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/login" replace />
   return children
 }
 

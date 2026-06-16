@@ -13,20 +13,22 @@ export default function Dashboard() {
   const [modules, setModules] = useState([])
   const [progress, setProgress] = useState({})
   const [loading, setLoading] = useState(true)
+  const [progressError, setProgressError] = useState(null)
   const { user } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
     Promise.all([
-      api.modules.list(),
-      api.progress.get(),
+      api.modules.list().catch((err) => { setProgressError(err.message); return [] }),
+      api.progress.get().catch((err) => { setProgressError(err.message); return [] }),
     ]).then(([mods, prog]) => {
       setModules(mods)
       const progMap = {}
-      prog.forEach(p => { progMap[p.lesson_id] = p })
+      if (Array.isArray(prog)) {
+        prog.forEach(p => { progMap[p.lesson_id] = p })
+      }
       setProgress(progMap)
-    }).catch(console.error)
-      .finally(() => setLoading(false))
+    }).finally(() => setLoading(false))
   }, [])
 
   const startLesson = async (module) => {
@@ -55,6 +57,15 @@ export default function Dashboard() {
           <div className="stat"><span className="stat-value">🔥 {user?.streak || 0}</span><span className="stat-label">Dias</span></div>
         </div>
       </div>
+
+      {progressError && (
+        <div className="notification notification-error">
+          ⚠️ {progressError}
+          <button className="btn btn-ghost" onClick={() => navigate('/login')} style={{ marginLeft: 12 }}>
+            Faça login novamente
+          </button>
+        </div>
+      )}
 
       <div className="module-grid">
         {modules.map((mod, idx) => {

@@ -30,6 +30,8 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
     setLastWrongKey(null)
   }, [target, lessonType])
 
+  const normalizeKey = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
   const getExpectedChar = useCallback(() => {
     if (!target) return null
     const idx = typedChars.length
@@ -50,13 +52,13 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
     const expected = getExpectedChar()
     if (expected) {
       setAttempts(a => a + 1)
-      if (key === expected) {
-        setTypedChars(prev => prev + key)
+      if (normalizeKey(key) === normalizeKey(expected)) {
+        setTypedChars(prev => prev + expected)
         setScore(s => s + 10)
-        if (onKeyCorrect) onKeyCorrect(key)
+        if (onKeyCorrect) onKeyCorrect(expected)
 
-        const newTyped = typedChars + key
-        if (newTyped === target.toUpperCase()) {
+        const newTyped = typedChars + expected
+        if (normalizeKey(newTyped) === normalizeKey(target.toUpperCase())) {
           setCompleted(true)
         }
       } else {

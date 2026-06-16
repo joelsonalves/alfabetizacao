@@ -65,4 +65,9 @@ describe('Profile page', () => {
       expect(screen.getByText(/Nenhuma conquista/)).toBeInTheDocument()
     })
   })
+
+  it('shows loading while fetching', () => {
+    render(<MemoryRouter><Profile /></MemoryRouter>)
+    expect(screen.getByText('Carregando...')).toBeInTheDocument()
+  })
 })

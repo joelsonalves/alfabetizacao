@@ -148,3 +148,60 @@ async def test_get_token_jti(client, auth_token):
 
 def test_get_token_jti_invalid():
     assert get_token_jti("invalid-token") is None
+
+
+@pytest.mark.asyncio
+async def test_access_token_24h_expiry(client, test_user):
+    login_resp = await client.post("/api/auth/login", json={
+        "email": "teste@teste.com", "password": "123456",
+    })
+    assert login_resp.status_code == 200
+    data = login_resp.json()
+    access_token = data["access_token"]
+
+    from app.services.auth import decode_access_token
+    payload = decode_access_token(access_token)
+    assert payload is not None
+    import time
+    now_ts = time.time()
+    exp_ts = payload["exp"]
+    delta_hours = (exp_ts - now_ts) / 3600
+    assert 20 <= delta_hours <= 25
+
+
+@pytest.mark.asyncio
+async def test_refresh_returns_24h_token(client, test_user):
+    login_resp = await client.post("/api/auth/login", json={
+        "email": "teste@teste.com", "password": "123456",
+    })
+    refresh_token = login_resp.json()["refresh_token"]
+
+    refresh_resp = await client.post("/api/auth/refresh", json={
+        "refresh_token": refresh_token,
+    })
+    assert refresh_resp.status_code == 200
+    new_access = refresh_resp.json()["access_token"]
+
+    from app.services.auth import decode_access_token
+    payload = decode_access_token(new_access)
+    assert payload is not None
+    import time
+    now_ts = time.time()
+    exp_ts = payload["exp"]
+    delta_hours = (exp_ts - now_ts) / 3600
+    assert 20 <= delta_hours <= 25
+
+
+@pytest.mark.asyncio
+async def test_access_token_24h_works_on_me(client, test_user):
+    from app.config import settings
+    from app.services.auth import create_access_token
+    from datetime import timedelta
+
+    token = create_access_token(
+        {"sub": test_user.id, "email": test_user.email},
+        expires_delta=timedelta(hours=settings.jwt_expiry_hours),
+    )
+    response = await client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json()["email"] == "teste@teste.com"

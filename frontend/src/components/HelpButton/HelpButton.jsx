@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useSpeech } from '../../hooks/useSpeech'
 import './HelpButton.css'
 
 const HELP_TIPS = {
@@ -31,6 +32,7 @@ const HELP_TIPS = {
 export default function HelpButton({ context = 'default' }) {
   const [open, setOpen] = useState(false)
   const tip = HELP_TIPS[context] || HELP_TIPS.default
+  const { speak, supported: ttsSupported } = useSpeech()
 
   useEffect(() => {
     if (!open) return
@@ -40,6 +42,12 @@ export default function HelpButton({ context = 'default' }) {
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [open])
+
+  useEffect(() => {
+    if (open && ttsSupported) {
+      speak(`${tip.title}: ${tip.text}`)
+    }
+  }, [open, tip.title, tip.text, speak, ttsSupported])
 
   return (
     <>

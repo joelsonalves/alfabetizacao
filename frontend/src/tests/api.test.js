@@ -1,9 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { api } from '../services/api'
 
 beforeEach(() => {
   localStorage.clear()
   global.fetch = vi.fn()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('api service', () => {
@@ -71,5 +75,76 @@ describe('api service', () => {
     const result = await api.modules.list()
     expect(result).toHaveLength(1)
     expect(result[0].name).toBe('Vogais')
+  })
+
+  it('returns __conflict on 409', async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      status: 409,
+      json: () => Promise.resolve({ detail: 'Conflito: versão desatualizada' }),
+    })
+
+    const result = await api.progress.update(1, { score: 10, version: 0 })
+    expect(result.__conflict).toBe(true)
+    expect(result.status).toBe(409)
+    expect(result.detail).toContain('Conflito')
+  })
+
+  it('clears tokens and redirects when refresh fails', async () => {
+    localStorage.setItem('token', 'expired-token')
+    localStorage.setItem('refresh_token', 'expired-refresh')
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({ detail: 'Unauthorized' }),
+    })
+
+    const originalLocation = window.location
+    delete window.location
+    window.location = { href: '' }
+
+    await expect(api.auth.me()).rejects.toThrow('Unauthorized')
+    expect(localStorage.getItem('token')).toBeNull()
+    expect(localStorage.getItem('refresh_token')).toBeNull()
+    expect(window.location.href).toBe('/login')
+
+    window.location = originalLocation
+  })
+
+  it('refreshes token and retries on 401', async () => {
+    localStorage.setItem('token', 'expired-token')
+    localStorage.setItem('refresh_token', 'valid-refresh')
+
+    let callCount = 0
+    global.fetch = vi.fn().mockImplementation(() => {
+      callCount++
+      if (callCount === 1) {
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          json: () => Promise.resolve({ detail: 'Unauthorized' }),
+        })
+      }
+      if (callCount === 2) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            access_token: 'new-token',
+            refresh_token: 'new-refresh',
+            user: { id: 1, name: 'Test' },
+          }),
+        })
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ id: 1 }),
+      })
+    })
+
+    const result = await api.auth.me()
+    expect(result).toEqual({ id: 1 })
+    expect(callCount).toBe(3)
+    expect(localStorage.getItem('token')).toBe('new-token')
   })
 })

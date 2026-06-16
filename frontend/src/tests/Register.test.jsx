@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -6,10 +6,21 @@ import React from 'react'
 import Register from '../pages/Register'
 
 const mockRegister = vi.fn()
+const mockNavigate = vi.fn()
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
 
 vi.mock('../hooks/useAuth', () => ({
   useAuth: () => ({ register: mockRegister, user: null, loading: false }),
 }))
+
+afterEach(() => {
+  mockRegister.mockClear()
+  mockNavigate.mockClear()
+})
 
 const renderRegister = () => render(
   <MemoryRouter>
@@ -56,5 +67,35 @@ describe('Register page', () => {
   it('has link to login', () => {
     renderRegister()
     expect(screen.getByText('Entrar')).toBeInTheDocument()
+  })
+
+  it('shows loading state during registration', async () => {
+    mockRegister.mockImplementation(() => new Promise(() => {}))
+
+    renderRegister()
+
+    await userEvent.type(screen.getByPlaceholderText('Seu nome'), 'Test')
+    await userEvent.type(screen.getByPlaceholderText('seu@email.com'), 'test@test.com')
+    await userEvent.type(screen.getByPlaceholderText('Crie uma senha'), '123456')
+    await userEvent.click(screen.getByRole('button', { name: 'Criar Conta' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Criando...' })).toBeDisabled()
+    })
+  })
+
+  it('navigates to dashboard on successful registration', async () => {
+    mockRegister.mockResolvedValue({ access_token: 'token', user: { id: 1, name: 'Test' } })
+
+    renderRegister()
+
+    await userEvent.type(screen.getByPlaceholderText('Seu nome'), 'Test')
+    await userEvent.type(screen.getByPlaceholderText('seu@email.com'), 'test@test.com')
+    await userEvent.type(screen.getByPlaceholderText('Crie uma senha'), '123456')
+    await userEvent.click(screen.getByRole('button', { name: 'Criar Conta' }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
+    })
   })
 })

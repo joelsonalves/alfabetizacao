@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
@@ -7,26 +8,34 @@ from app.models.user import User, TokenBlocklist
 from app.schemas.user import UserRegister, UserLogin, UserResponse, TokenResponse, RefreshRequest, LogoutResponse
 from app.services.auth import hash_password, verify_password, create_access_token, create_refresh_token, decode_access_token
 from app.services.cleanup import clean_expired_blocklist_sync
+from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
 def get_current_user(authorization: str = Header(default=None), db: Session = Depends(get_db)) -> User:
     if not authorization:
+        logger.warning("401: missing Authorization header")
         raise HTTPException(status_code=401, detail="Not authenticated")
     scheme, _, token = authorization.partition(" ")
     if scheme.lower() != "bearer":
+        logger.warning("401: invalid auth scheme: %s", scheme)
         raise HTTPException(status_code=401, detail="Invalid auth scheme")
     payload = decode_access_token(token)
     if payload is None:
+        logger.warning("401: token decode failed (expired or malformed)")
         raise HTTPException(status_code=401, detail="Invalid token")
     jti = payload.get("jti")
     if jti:
         blocked = db.query(TokenBlocklist).filter(TokenBlocklist.jti == jti).first()
         if blocked:
+            logger.warning("401: token revoked (jti=%s)", jti)
             raise HTTPException(status_code=401, detail="Token revoked")
     user = db.query(User).filter(User.id == int(payload.get("sub"))).first()
     if user is None:
+        logger.warning("401: user not found for sub=%s", payload.get("sub"))
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
@@ -49,7 +58,7 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(minutes=15))
+    access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
     refresh_token = create_refresh_token({"sub": user.id, "email": user.email})
     return TokenResponse(access_token=access_token, refresh_token=refresh_token, user=UserResponse.model_validate(user))
 
@@ -74,7 +83,7 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
     user.last_active_date = datetime.utcnow()
     db.commit()
 
-    access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(minutes=15))
+    access_token = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
     refresh_token = create_refresh_token({"sub": user.id, "email": user.email})
     return TokenResponse(access_token=access_token, refresh_token=refresh_token, user=UserResponse.model_validate(user))
 
@@ -103,7 +112,7 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == int(payload.get("sub"))).first()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
-    new_access = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(minutes=15))
+    new_access = create_access_token({"sub": user.id, "email": user.email}, expires_delta=timedelta(hours=settings.jwt_expiry_hours))
     new_refresh = create_refresh_token({"sub": user.id, "email": user.email})
     return TokenResponse(access_token=new_access, refresh_token=new_refresh, user=UserResponse.model_validate(user))
 

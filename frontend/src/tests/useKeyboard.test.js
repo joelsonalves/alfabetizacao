@@ -87,6 +87,26 @@ describe('useKeyboard', () => {
     expect(result.current.typedChars).toBe('A')
   })
 
+  it('accepts accented character via normalization', () => {
+    const props = { ...defaultProps, target: 'SOFÁ', lessonType: 'word' }
+    const { result } = renderHook(() => useKeyboard(props))
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'S' }))
+    })
+    expect(result.current.typedChars).toBe('SOFÁ'.charAt(0))
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'O' }))
+    })
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F' }))
+    })
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }))
+    })
+    expect(result.current.typedChars).toBe('SOFÁ')
+    expect(result.current.completed).toBe(true)
+  })
+
   it('resets state on target change', () => {
     const { result, rerender } = renderHook((props) => useKeyboard(props), {
       initialProps: defaultProps,
