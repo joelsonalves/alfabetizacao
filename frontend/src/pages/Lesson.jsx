@@ -470,7 +470,7 @@ export default function Lesson() {
                   disabled={isSpeaking}
                   aria-label={`Ouvir pronúncia de ${lesson?.target || ''}`}
                 >
-                  🔊 Ouvir
+                  <>🔊 Ouvir <span className="speech-badge">1</span></>
                 </button>
               )}
               <button
@@ -479,7 +479,7 @@ export default function Lesson() {
                 disabled={isSpeaking}
                 aria-label={isListening ? 'Terminei de ler' : `Ler em voz alta ${lesson?.target || ''}`}
               >
-                {isListening ? '🛑 Terminei de ler' : '🎤 Ler em voz alta...'}
+                {isListening ? <>🛑 Terminei de ler <span className="speech-badge">2</span></> : <>🎤 Ler em voz alta... <span className="speech-badge">2</span></>}
               </button>
             </div>
           )}
