@@ -39,7 +39,7 @@ def upgrade() -> None:
                existing_type=sa.INTEGER(),
                nullable=True,
                existing_server_default=sa.text('0'))
-    op.add_column('users', sa.Column('is_admin', sa.Boolean(), nullable=True))
+    op.add_column('users', sa.Column('is_admin', sa.Boolean(), nullable=False, server_default=sa.text('false')))
     # ### end Alembic commands ###
 
 
