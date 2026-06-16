@@ -30,4 +30,4 @@
 
 - [ ] 4.1 Testar manualmente no navegador: abrir lição blending, passar por todas as etapas (fala + teclado), verificar progresso e pontuação
 - [x] 4.2 Rodar `npm test` e confirmar que todos os 122 testes existentes continuam passando
-- [ ] 4.3 Escrever testes unitários para o componente SyllableBlending (renderização inicial, transição entre etapas, chamada de onComplete)
+- [x] 4.3 Escrever testes unitários para o componente SyllableBlending (renderização inicial, transição entre etapas, chamada de onComplete)
