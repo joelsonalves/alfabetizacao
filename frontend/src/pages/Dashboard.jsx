@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
+import { MODULE_ICONS } from '../constants/modules'
+import { buildProgressMap } from '../utils/progress'
 import './Dashboard.css'
-
-const MODULE_ICONS = {
-  vowel: '🔤', consonant: '🔠', simple_syllable: '🔡',
-  complex_syllable: '📚', word: '📝', phrase: '💬', sentence: '📖',
-}
 
 export default function Dashboard() {
   const [modules, setModules] = useState([])
@@ -23,11 +20,7 @@ export default function Dashboard() {
       api.progress.get().catch((err) => { setProgressError(err.message); return [] }),
     ]).then(([mods, prog]) => {
       setModules(mods)
-      const progMap = {}
-      if (Array.isArray(prog)) {
-        prog.forEach(p => { progMap[p.lesson_id] = p })
-      }
-      setProgress(progMap)
+      setProgress(buildProgressMap(prog))
     }).finally(() => setLoading(false))
   }, [])
 

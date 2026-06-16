@@ -1,51 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api, updateProgressWithRetry } from '../services/api'
-import { useSpeech, LETTER_SOUNDS, LETTER_WORDS } from '../hooks/useSpeech'
+import { useSpeech } from '../hooks/useSpeech'
+import { LETTER_SOUNDS, LETTER_WORDS } from '../constants/speech'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useKeyboard } from '../hooks/useKeyboard'
 import { useAuth } from '../hooks/useAuth'
 import VirtualKeyboard from '../components/VirtualKeyboard/VirtualKeyboard'
 import LevelUp from '../components/LevelUp/LevelUp'
 import SyllableBlending from '../components/SyllableBlending/SyllableBlending'
+import { POINTS, SPEECH_PREFIXES, SPEECH_TYPE_LABELS, SPEECH_TYPE_NAMES, SPEECH_TIMEOUTS } from '../constants/lesson'
+import { normalize, stripSpaces, getExpectedChar } from '../utils/string'
+import { isSubsequence } from '../utils/array'
+import { tryExtractTarget, extractSpokenContent } from '../utils/speech'
+import { createFeedback } from '../utils/feedback'
 import './Lesson.css'
-
-const POINTS = { letter: 10, syllable: 25, word: 50, blending: 60, phrase: 100, sentence: 100 }
-
-const SPEECH_PREFIXES = [
-  'LETRA ', 'A LETRA ', 'O SOM DE ', 'SOM DE ', 'SOM DA ', 'O SOM DA ',
-  'SÍLABA ', 'A SÍLABA ', 'PALAVRA ', 'A PALAVRA ', 'FRASE ', 'A FRASE ',
-  'FALE ', 'DIGA ', 'A ', 'O ',
-]
-
-const SPEECH_TYPE_LABELS = {
-  letter: 'LETRA',
-  consonant: 'LETRA',
-  syllable: 'SÍLABA',
-  word: 'PALAVRA',
-  phrase: 'FRASE',
-  sentence: 'FRASE',
-}
-
-const SPEECH_TYPE_NAMES = {
-  letter: 'letra',
-  consonant: 'letra',
-  syllable: 'sílaba',
-  word: 'palavra',
-  blending: 'palavra',
-  phrase: 'frase',
-  sentence: 'frase',
-}
-
-const SPEECH_TIMEOUTS = {
-  letter: 4000,
-  consonant: 4000,
-  syllable: 6000,
-  word: 8000,
-  blending: 20000,
-  phrase: 20000,
-  sentence: 20000,
-}
 
 export default function Lesson() {
   const { moduleId, lessonId } = useParams()
@@ -75,11 +44,9 @@ export default function Lesson() {
   const { isListening, supported: srSupported, startListening, stopListening } = useSpeechRecognition()
 
   const [feedbacks, setFeedbacks] = useState([])
-  const feedbackIdRef = useRef(0)
 
   const addFeedback = useCallback((type, message) => {
-    const id = ++feedbackIdRef.current
-    setFeedbacks(prev => [...prev.slice(-4), { id, type, message }])
+    setFeedbacks(prev => [...prev.slice(-4), createFeedback(type, message)])
   }, [])
 
   const handleBlendingComplete = useCallback(() => {
@@ -202,59 +169,6 @@ export default function Lesson() {
     }).catch(console.error)
       .finally(() => setLoading(false))
   }, [lessonId])
-
-  const normalize = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z\s]/g, '').trim()
-
-  const stripSpaces = (s) => s.replace(/\s+/g, '')
-
-  const isSubsequence = (targetWords, transcriptWords) => {
-    let ti = 0
-    for (const tw of transcriptWords) {
-      if (ti < targetWords.length && tw === targetWords[ti]) ti++
-    }
-    return ti === targetWords.length
-  }
-
-  const tryExtractTarget = (transcript, target, sounds, lesson_type) => {
-    const normalized = normalize(transcript)
-    const t = normalize(target)
-
-    if (sounds.some(s => normalized === normalize(s))) return true
-
-    if (normalized === t) return true
-
-    if (stripSpaces(normalized) === stripSpaces(t)) return true
-    if (sounds.some(s => stripSpaces(normalized) === stripSpaces(normalize(s)))) return true
-
-    for (const prefix of SPEECH_PREFIXES) {
-      const stripped = normalized.replace(normalize(prefix), '').trim()
-      if (stripped === t) return true
-      if (sounds.some(s => stripped === normalize(s))) return true
-    }
-
-    const words = normalized.split(/\s+/)
-    if (words.includes(t)) return true
-    if (sounds.some(s => words.includes(normalize(s)))) return true
-
-    if (normalized.endsWith(t)) return true
-
-    if (lesson_type === 'sentence' || lesson_type === 'phrase') {
-      const targetWords = t.split(/\s+/)
-      const transcriptWords = normalized.split(/\s+/)
-      if (isSubsequence(targetWords, transcriptWords)) return true
-    }
-
-    return false
-  }
-
-  const extractSpokenContent = (transcript, target, sounds, lesson_type) => {
-    const isCorrect = tryExtractTarget(transcript, target, sounds, lesson_type)
-    const normalized = normalize(transcript)
-    const content = isCorrect
-      ? target
-      : normalized || transcript
-    return { content, isCorrect }
-  }
 
   const handleSpeech = () => {
     if (isListening) {

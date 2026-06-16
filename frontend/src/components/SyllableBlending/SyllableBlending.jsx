@@ -2,12 +2,12 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import VirtualKeyboard from '../VirtualKeyboard/VirtualKeyboard'
+import { normalize } from '../../utils/string'
+import { parseLessonContent } from '../../utils/lesson'
 import './SyllableBlending.css'
 
 export default function SyllableBlending({ lesson, onComplete }) {
-  const content = typeof lesson.content === 'string'
-    ? JSON.parse(lesson.content)
-    : lesson.content || { syllables: [], word: lesson.target }
+  const content = parseLessonContent(lesson)
 
   const steps = [...content.syllables, content.word]
   const [currentStep, setCurrentStep] = useState(0)
@@ -41,9 +41,6 @@ export default function SyllableBlending({ lesson, onComplete }) {
       }
     }
   }, [speechDone, kb.completed, currentStep, totalSteps, allDone, onComplete])
-
-  const normalize = (s) =>
-    (s || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
 
   const handleSpeech = () => {
     if (isListening) {

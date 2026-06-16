@@ -1,17 +1,6 @@
 import React from 'react'
+import { ROWS, KEY_WIDTH } from '../../constants/keyboard'
 import './VirtualKeyboard.css'
-
-const ROWS = [
-  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],
-  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']'],
-  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ç', '~'],
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', ';', '/'],
-]
-
-const KEY_WIDTH = {
-  'default': 1,
-  ' ': 6,
-}
 
 export default function VirtualKeyboard({ pressedKey, onKeyClick, disabled }) {
   const getKeyClass = (key) => {

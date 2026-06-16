@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-
-const ABNT2_KEYS = [
-  ['ESC', '!1', '@2', '#3', '$4', '%5', '¨6', '&7', '*8', '(9', ')0', '-_', '=+', 'BACKSPACE'],
-  ['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '´`', '[[', ']]', 'ENTER'],
-  ['CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ç', '~^', 'ENTER'],
-  ['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<,', '>.', ':;', '?_', 'SHIFT'],
-  ['CTRL', 'ALT', ' ', 'ALTGR', 'CTRL'],
-]
+import { ABNT2_KEYS } from '../constants/keyboard'
+import { normalizeKey, getExpectedChar as getExpectedCharFromString } from '../utils/string'
+import { createSyntheticKeyboardEvent } from '../utils/keyboard'
 
 export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, lessonType }) {
   const [pressedKey, setPressedKey] = useState(null)
@@ -30,13 +25,8 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
     setLastWrongKey(null)
   }, [target, lessonType])
 
-  const normalizeKey = (s) => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-
   const getExpectedChar = useCallback(() => {
-    if (!target) return null
-    const idx = typedChars.length
-    if (idx < target.length) return target[idx].toUpperCase()
-    return null
+    return getExpectedCharFromString(target, typedChars)
   }, [target, typedChars])
 
   const handleKeyDown = useCallback((event) => {
@@ -77,8 +67,7 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
   }, [handleKeyDown])
 
   const handleVirtualKeyClick = useCallback((key) => {
-    const event = { key, preventDefault: () => {} }
-    handleKeyDown(event)
+    handleKeyDown(createSyntheticKeyboardEvent(key))
   }, [handleKeyDown])
 
   return {
