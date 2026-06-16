@@ -176,6 +176,7 @@
   background-color: white;
   transition: 0.3s;
   border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.15);
 }
 
 .toggle-switch input:checked + .toggle-slider {
