@@ -173,6 +173,8 @@ export default function Lesson() {
         api.images.syllable(l.target).then(setImageData).catch(() => {})
       } else if (l.lesson_type === 'word') {
         api.images.word(l.target).then(setImageData).catch(() => {})
+      } else if (l.lesson_type === 'phrase' || l.lesson_type === 'sentence') {
+        api.images.text(l.target).then(setImageData).catch(() => {})
       }
     }).catch(console.error)
       .finally(() => setLoading(false))

@@ -29,6 +29,7 @@ vi.mock('../services/api', () => ({
       emoji: () => Promise.resolve({ type: 'emoji', value: '🍎' }),
       syllable: () => Promise.resolve({ type: 'emoji', value: '🍎' }),
       word: () => Promise.resolve({ type: 'emoji', value: '🖼️' }),
+      text: () => Promise.resolve({ type: 'emoji', value: '🍎' }),
     },
   },
   updateProgressWithRetry: (...args) => mockApiProgressUpdate(...args),

@@ -132,6 +132,11 @@ def get_lesson_image_fields(lesson_type: str, target: str) -> dict:
     elif lesson_type == "word":
         fields["image_url"] = WORD_EMOJI_MAP.get(target.lower())
         fields["alt_text"] = f"Emoji de {target}"
+    elif lesson_type in ("phrase", "sentence"):
+        key = target.lower().rstrip(".!?,")
+        fields["image_url"] = WORD_EMOJI_MAP.get(key)
+        if fields["image_url"]:
+            fields["alt_text"] = f"Emoji de {target}"
     return fields
 
 MODULES_DATA = [

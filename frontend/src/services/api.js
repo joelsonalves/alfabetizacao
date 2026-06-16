@@ -110,9 +110,10 @@ export const api = {
     unlockAchievement: (type) => request(`/progress/achievements/${type}`, { method: 'POST' }),
   },
   images: {
-    emoji: (letter) => request(`/images/emoji/${letter}`),
-    word: (word) => request(`/images/word/${word}`),
-    syllable: (syllable) => request(`/images/syllable/${syllable}`),
+    emoji: (letter) => request(`/images/emoji/${encodeURIComponent(letter)}`),
+    word: (word) => request(`/images/word/${encodeURIComponent(word)}`),
+    syllable: (syllable) => request(`/images/syllable/${encodeURIComponent(syllable)}`),
+    text: (text) => request(`/images/text/${encodeURIComponent(text)}`),
   },
   featureFlags: {
     list: () => request('/feature-flags'),

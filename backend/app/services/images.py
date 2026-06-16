@@ -114,6 +114,29 @@ def get_emoji_for_syllable(syllable: str) -> str | None:
     return get_emoji_for_letter(key[0])
 
 
+def get_emoji_for_text(text: str) -> str | None:
+    cleaned = text.lower().strip().rstrip(".!?,")
+    emoji = get_emoji_for_word(cleaned)
+    if emoji:
+        return emoji
+    words = cleaned.split()
+    for word in words:
+        if word.lower() in ("o", "a", "os", "as", "um", "uma", "de", "da", "do", "em", "no", "na"):
+            continue
+        emoji = get_emoji_for_word(word)
+        if emoji:
+            return emoji
+        if len(word) >= 2:
+            emoji = get_emoji_for_syllable(word[:2].upper())
+            if emoji:
+                return emoji
+    if len(words):
+        emoji = get_emoji_for_syllable(words[0][:2].upper())
+        if emoji:
+            return emoji
+    return None
+
+
 def build_fallback_image_response(word: str) -> dict:
     emoji = get_emoji_for_word(word)
     if emoji:

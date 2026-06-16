@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.services.images import get_emoji_for_letter, get_word_image_query, fetch_unsplash_image, build_fallback_image_response, get_emoji_for_syllable
+from app.services.images import get_emoji_for_letter, get_emoji_for_text, get_word_image_query, fetch_unsplash_image, build_fallback_image_response, get_emoji_for_syllable
 from app.config import settings
 
 router = APIRouter()
@@ -20,6 +20,14 @@ def get_syllable_image(syllable: str):
     if not emoji:
         raise HTTPException(status_code=404, detail="No image for syllable")
     return {"type": "emoji", "value": emoji, "syllable": syllable.upper()}
+
+
+@router.get("/text/{text:path}")
+def get_text_image(text: str):
+    emoji = get_emoji_for_text(text)
+    if not emoji:
+        return {"type": "emoji", "value": "🖼️", "text": text, "message": "Nenhuma imagem disponível"}
+    return {"type": "emoji", "value": emoji, "text": text}
 
 
 @router.get("/word/{word}")
