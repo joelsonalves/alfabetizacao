@@ -112,6 +112,7 @@ export const api = {
   images: {
     emoji: (letter) => request(`/images/emoji/${letter}`),
     word: (word) => request(`/images/word/${word}`),
+    syllable: (syllable) => request(`/images/syllable/${syllable}`),
   },
   featureFlags: {
     list: () => request('/feature-flags'),

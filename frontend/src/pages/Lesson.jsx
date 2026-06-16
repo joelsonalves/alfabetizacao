@@ -169,6 +169,8 @@ export default function Lesson() {
         setImageData({ type: 'emoji', value: l.image_url, alt: l.alt_text || l.target })
       } else if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
         api.images.emoji(l.target).then(setImageData).catch(() => {})
+      } else if (l.lesson_type === 'syllable') {
+        api.images.syllable(l.target).then(setImageData).catch(() => {})
       } else if (l.lesson_type === 'word') {
         api.images.word(l.target).then(setImageData).catch(() => {})
       }

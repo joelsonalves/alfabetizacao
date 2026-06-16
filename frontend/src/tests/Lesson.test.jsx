@@ -27,6 +27,7 @@ vi.mock('../services/api', () => ({
     },
     images: {
       emoji: () => Promise.resolve({ type: 'emoji', value: '🍎' }),
+      syllable: () => Promise.resolve({ type: 'emoji', value: '🍎' }),
       word: () => Promise.resolve({ type: 'emoji', value: '🖼️' }),
     },
   },

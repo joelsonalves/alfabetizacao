@@ -16,6 +16,61 @@ WORD_IMAGE_QUERIES = {
     "o gato bebe": "cat drinking milk",
 }
 
+SYLLABLE_EMOJI_MAP = {
+    # B
+    "BA": "⚽", "BE": "👶", "BI": "🚲", "BO": "🥾", "BU": "🐴",
+    # C
+    "CA": "🏠", "CE": "🌤️", "CI": "🎬", "CO": "🐍", "CU": "🧊",
+    # D
+    "DA": "🎲", "DE": "🦷", "DI": "💰", "DO": "🍩", "DU": "🚿",
+    # F
+    "FA": "🔪", "FE": "🌾", "FI": "🎀", "FO": "🦭", "FU": "💨",
+    # G
+    "GA": "🐱", "GE": "🧊", "GI": "🦒", "GO": "🐬", "GU": "☂️",
+    # H
+    "HA": "🍔", "HE": "🚁", "HI": "🦛", "HO": "👨", "HU": "🏥",
+    # J
+    "JA": "🪟", "JE": "🐊", "JI": "🐊", "JO": "📰", "JU": "⚖️",
+    # L
+    "LA": "🍊", "LE": "🦁", "LI": "📖", "LO": "🌙", "LU": "💡",
+    # M
+    "MA": "🤚", "ME": "🪑", "MI": "🌽", "MO": "🏍️", "MU": "🎵",
+    # N
+    "NA": "🚢", "NE": "❄️", "NI": "🪺", "NO": "🌙", "NU": "☁️",
+    # P
+    "PA": "🦆", "PE": "🐟", "PI": "🍦", "PO": "🚪", "PU": "🦘",
+    # Q
+    "QU": "🧀",
+    # R
+    "RA": "🐭", "RE": "⌚", "RI": "🌊", "RO": "🌹", "RU": "🏙️",
+    # S
+    "SA": "🐸", "SE": "📮", "SI": "🔔", "SO": "☀️", "SU": "😱",
+    # T
+    "TA": "🐜", "TE": "📺", "TI": "🐯", "TO": "🍅", "TU": "🦈",
+    # V
+    "VA": "🐄", "VE": "🕯️", "VI": "🎸", "VO": "👵", "VU": "🐄",
+    # Z
+    "ZA": "🦓", "ZE": "0️⃣", "ZI": "🦓", "ZO": "🦓", "ZU": "🦓",
+    # complex syllables
+    "BRA": "💪", "BRE": "💪", "BRI": "💪", "BRO": "💪", "BRU": "💪",
+    "CRA": "🌸", "CRE": "🧴", "CRI": "✝️", "CRO": "🐍", "CRU": "✝️",
+    "DRA": "🐉", "DRE": "🐉", "DRI": "🐉", "DRO": "🐉", "DRU": "🐉",
+    "FRA": "🍗", "FRE": "🍗", "FRI": "🥶", "FRO": "🍗", "FRU": "🍎",
+    "GRA": "🌿", "GRE": "🌿", "GRI": "🌿", "GRO": "🌿", "GRU": "🌿",
+    "PRA": "🍽️", "PRE": "🎁", "PRI": "🤴", "PRO": "🍽️", "PRU": "🍽️",
+    "TRA": "🚜", "TRE": "🚂", "TRI": "🛴", "TRO": "🚜", "TRU": "🚜",
+    "BLA": "⚽", "BLE": "⚽", "BLI": "⚽", "BLO": "⚽", "BLU": "⚽",
+    "CLA": "🏠", "CLE": "🏠", "CLI": "🏠", "CLO": "🏠", "CLU": "🏠",
+    "FLA": "🎵", "FLE": "🎵", "FLI": "🎵", "FLO": "🌸", "FLU": "🌸",
+    "GLA": "🌍", "GLE": "🌍", "GLI": "🌍", "GLO": "🌍", "GLU": "🌍",
+    "PLA": "🌱", "PLE": "🌱", "PLI": "🌱", "PLO": "🌱", "PLU": "🌱",
+    "TLA": "🐜", "TLE": "🐜", "TLI": "🐜", "TLO": "🐜", "TLU": "🐜",
+    # CVC
+    "AR": "🎯", "ER": "🌳", "IR": "🌳", "OR": "🌳", "UR": "🌳",
+    "AL": "🧂", "EL": "🧂", "IL": "🧂", "OL": "🧂", "UL": "🧂",
+    "AN": "🐜", "EN": "🌳", "IN": "🌳", "ON": "🌳", "UN": "🌳",
+}
+
 WORD_EMOJI_MAP = {
     # words
     "casa": "🏠", "bola": "⚽", "gato": "🐱", "dado": "🎲",
@@ -52,6 +107,13 @@ def get_word_image_query(word: str) -> str:
 
 def get_emoji_for_word(word: str) -> str | None:
     return WORD_EMOJI_MAP.get(word.lower().rstrip("."))
+
+
+def get_emoji_for_syllable(syllable: str) -> str | None:
+    key = syllable.upper()
+    if key in SYLLABLE_EMOJI_MAP:
+        return SYLLABLE_EMOJI_MAP[key]
+    return get_emoji_for_letter(key[0])
 
 
 def build_fallback_image_response(word: str) -> dict:

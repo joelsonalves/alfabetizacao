@@ -68,6 +68,42 @@ WORD_IMAGE_QUERIES = {
     "o gato bebe": "cat drinking milk",
 }
 
+SYLLABLE_EMOJI_MAP = {
+    "BA": "⚽", "BE": "👶", "BI": "🚲", "BO": "🥾", "BU": "🐴",
+    "CA": "🏠", "CE": "🌤️", "CI": "🎬", "CO": "🐍", "CU": "🧊",
+    "DA": "🎲", "DE": "🦷", "DI": "💰", "DO": "🍩", "DU": "🚿",
+    "FA": "🔪", "FE": "🌾", "FI": "🎀", "FO": "🦭", "FU": "💨",
+    "GA": "🐱", "GE": "🧊", "GI": "🦒", "GO": "🐬", "GU": "☂️",
+    "HA": "🍔", "HE": "🚁", "HI": "🦛", "HO": "👨", "HU": "🏥",
+    "JA": "🪟", "JE": "🐊", "JI": "🐊", "JO": "📰", "JU": "⚖️",
+    "LA": "🍊", "LE": "🦁", "LI": "📖", "LO": "🌙", "LU": "💡",
+    "MA": "🤚", "ME": "🪑", "MI": "🌽", "MO": "🏍️", "MU": "🎵",
+    "NA": "🚢", "NE": "❄️", "NI": "🪺", "NO": "🌙", "NU": "☁️",
+    "PA": "🦆", "PE": "🐟", "PI": "🍦", "PO": "🚪", "PU": "🦘",
+    "QU": "🧀",
+    "RA": "🐭", "RE": "⌚", "RI": "🌊", "RO": "🌹", "RU": "🏙️",
+    "SA": "🐸", "SE": "📮", "SI": "🔔", "SO": "☀️", "SU": "😱",
+    "TA": "🐜", "TE": "📺", "TI": "🐯", "TO": "🍅", "TU": "🦈",
+    "VA": "🐄", "VE": "🕯️", "VI": "🎸", "VO": "👵", "VU": "🐄",
+    "ZA": "🦓", "ZE": "0️⃣", "ZI": "🦓", "ZO": "🦓", "ZU": "🦓",
+    "BRA": "💪", "BRE": "💪", "BRI": "💪", "BRO": "💪", "BRU": "💪",
+    "CRA": "🌸", "CRE": "🧴", "CRI": "✝️", "CRO": "🐍", "CRU": "✝️",
+    "DRA": "🐉", "DRE": "🐉", "DRI": "🐉", "DRO": "🐉", "DRU": "🐉",
+    "FRA": "🍗", "FRE": "🍗", "FRI": "🥶", "FRO": "🍗", "FRU": "🍎",
+    "GRA": "🌿", "GRE": "🌿", "GRI": "🌿", "GRO": "🌿", "GRU": "🌿",
+    "PRA": "🍽️", "PRE": "🎁", "PRI": "🤴", "PRO": "🍽️", "PRU": "🍽️",
+    "TRA": "🚜", "TRE": "🚂", "TRI": "🛴", "TRO": "🚜", "TRU": "🚜",
+    "BLA": "⚽", "BLE": "⚽", "BLI": "⚽", "BLO": "⚽", "BLU": "⚽",
+    "CLA": "🏠", "CLE": "🏠", "CLI": "🏠", "CLO": "🏠", "CLU": "🏠",
+    "FLA": "🎵", "FLE": "🎵", "FLI": "🎵", "FLO": "🌸", "FLU": "🌸",
+    "GLA": "🌍", "GLE": "🌍", "GLI": "🌍", "GLO": "🌍", "GLU": "🌍",
+    "PLA": "🌱", "PLE": "🌱", "PLI": "🌱", "PLO": "🌱", "PLU": "🌱",
+    "TLA": "🐜", "TLE": "🐜", "TLI": "🐜", "TLO": "🐜", "TLU": "🐜",
+    "AR": "🎯", "ER": "🌳", "IR": "🌳", "OR": "🌳", "UR": "🌳",
+    "AL": "🧂", "EL": "🧂", "IL": "🧂", "OL": "🧂", "UL": "🧂",
+    "AN": "🐜", "EN": "🌳", "IN": "🌳", "ON": "🌳", "UN": "🌳",
+}
+
 WORD_EMOJI_MAP = {
     "casa": "🏠", "bola": "⚽", "gato": "🐱", "dado": "🎲",
     "foca": "🦭", "bala": "🍬", "sol": "☀️", "mar": "🌊",
@@ -92,6 +128,9 @@ def get_lesson_image_fields(lesson_type: str, target: str) -> dict:
     if lesson_type in ("letter", "consonant"):
         fields["image_url"] = EMOJI_MAP.get(target.upper())
         fields["alt_text"] = f"Emoji da letra {target.upper()}"
+    elif lesson_type == "syllable":
+        fields["image_url"] = SYLLABLE_EMOJI_MAP.get(target.upper()) or EMOJI_MAP.get(target[0].upper())
+        fields["alt_text"] = f"Emoji da sílaba {target.upper()}"
     elif lesson_type == "word":
         fields["image_url"] = WORD_EMOJI_MAP.get(target.lower())
         fields["alt_text"] = f"Emoji de {target}"
