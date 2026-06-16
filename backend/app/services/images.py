@@ -16,6 +16,31 @@ WORD_IMAGE_QUERIES = {
     "o gato bebe": "cat drinking milk",
 }
 
+WORD_EMOJI_MAP = {
+    # words
+    "casa": "🏠", "bola": "⚽", "gato": "🐱", "dado": "🎲",
+    "foca": "🦭", "bala": "🍬", "sol": "☀️", "mar": "🌊",
+    "rato": "🐭", "sapo": "🐸", "pato": "🦆",
+    "brasil": "🇧🇷", "prato": "🍽️", "flor": "🌸", "trator": "🚜",
+    "cachorro": "🐕", "elefante": "🐘", "abacaxi": "🍍",
+    "borboleta": "🦋", "girassol": "🌻", "chocolate": "🍫",
+    "janela": "🪟", "cavalo": "🐴",
+    # extra image query words
+    "bebe": "👶", "bicho": "🐛", "burro": "🐴", "braco": "💪", "creme": "🧴",
+    # phrases
+    "o gato bebe": "🐱", "a bola rola": "⚽", "o sol brilha": "☀️",
+    "a casa é grande": "🏠", "o rato comeu o queijo": "🐭",
+    "a flor é linda": "🌸", "meu gato é preto": "🐱", "a borboleta voou": "🦋",
+    # sentences
+    "o gato bebeu leite": "🐱", "a casa tem uma porta vermelha": "🏠",
+    "o menino joga a bola no quintal": "⚽",
+    "as flores do jardim são coloridas": "🌸",
+    "o cachorro corre atrás do gato": "🐕",
+    "a borboleta pousou na flor amarela": "🦋",
+    "o sol se pôs e a lua brilhou": "🌅",
+    "pedro e maria foram à escola juntos": "🏫",
+}
+
 
 def get_emoji_for_letter(letter: str) -> str | None:
     return EMOJI_MAP.get(letter.upper())
@@ -25,12 +50,23 @@ def get_word_image_query(word: str) -> str:
     return WORD_IMAGE_QUERIES.get(word.lower(), word.lower())
 
 
+def get_emoji_for_word(word: str) -> str | None:
+    return WORD_EMOJI_MAP.get(word.lower().rstrip("."))
+
+
 def build_fallback_image_response(word: str) -> dict:
+    emoji = get_emoji_for_word(word)
+    if emoji:
+        return {
+            "type": "emoji",
+            "value": emoji,
+            "word": word,
+        }
     return {
         "type": "emoji",
         "value": "🖼️",
         "word": word,
-        "message": "Unsplash API key not configured or request failed",
+        "message": "Nenhuma imagem disponível",
     }
 
 

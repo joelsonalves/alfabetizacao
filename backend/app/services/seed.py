@@ -68,6 +68,17 @@ WORD_IMAGE_QUERIES = {
     "o gato bebe": "cat drinking milk",
 }
 
+WORD_EMOJI_MAP = {
+    "casa": "🏠", "bola": "⚽", "gato": "🐱", "dado": "🎲",
+    "foca": "🦭", "bala": "🍬", "sol": "☀️", "mar": "🌊",
+    "rato": "🐭", "sapo": "🐸", "pato": "🦆",
+    "brasil": "🇧🇷", "prato": "🍽️", "flor": "🌸", "trator": "🚜",
+    "cachorro": "🐕", "elefante": "🐘", "abacaxi": "🍍",
+    "borboleta": "🦋", "girassol": "🌻", "chocolate": "🍫",
+    "janela": "🪟", "cavalo": "🐴",
+    "bebe": "👶", "bicho": "🐛", "burro": "🐴", "braco": "💪", "creme": "🧴",
+}
+
 CMS_DEFAULTS = {
     "active": True,
     "image_active": True,
@@ -82,10 +93,8 @@ def get_lesson_image_fields(lesson_type: str, target: str) -> dict:
         fields["image_url"] = EMOJI_MAP.get(target.upper())
         fields["alt_text"] = f"Emoji da letra {target.upper()}"
     elif lesson_type == "word":
-        word_key = target.lower()
-        query = WORD_IMAGE_QUERIES.get(word_key)
-        if query:
-            fields["alt_text"] = f"Imagem de {target}"
+        fields["image_url"] = WORD_EMOJI_MAP.get(target.lower())
+        fields["alt_text"] = f"Emoji de {target}"
     return fields
 
 MODULES_DATA = [
