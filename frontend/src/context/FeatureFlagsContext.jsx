@@ -8,6 +8,11 @@ export function FeatureFlagsProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   const loadFlags = useCallback(() => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     api.featureFlags.list()
       .then((list) => {
