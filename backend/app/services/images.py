@@ -18,7 +18,7 @@ WORD_IMAGE_QUERIES = {
 
 SYLLABLE_EMOJI_MAP = {
     # B
-    "BA": "⚽", "BE": "👶", "BI": "🚲", "BO": "🥾", "BU": "🐴",
+    "BA": "🍬", "BE": "👶", "BI": "🚲", "BO": "⚽", "BU": "🐴",
     # C
     "CA": "🏠", "CE": "🌤️", "CI": "🎬", "CO": "🐍", "CU": "🧊",
     # D
