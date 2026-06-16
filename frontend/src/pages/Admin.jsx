@@ -41,10 +41,15 @@ function FlagsTab() {
               <td><code>{f.key}</code></td>
               <td>{f.description}</td>
               <td>
-                <label className="toggle-switch">
-                  <input type="checkbox" checked={f.active} onChange={() => toggleFlag(f.key, f.active)} />
-                  <span className="toggle-slider"></span>
-                </label>
+                <div className="status-cell">
+                  <label className="toggle-switch">
+                    <input type="checkbox" checked={f.active} onChange={() => toggleFlag(f.key, f.active)} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <span className={`status-badge ${f.active ? 'active' : 'inactive'}`}>
+                    {f.active ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
               </td>
             </tr>
           ))}
@@ -319,10 +324,15 @@ function ContentTab() {
                   ) : l.sort_order}
                 </td>
                 <td>
-                  <label className="toggle-switch">
-                    <input type="checkbox" checked={l.active} onChange={() => toggleActive(l.id, l.active)} />
-                    <span className="toggle-slider"></span>
-                  </label>
+                  <div className="status-cell">
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={l.active} onChange={() => toggleActive(l.id, l.active)} />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    <span className={`status-badge ${l.active ? 'active' : 'inactive'}`}>
+                      {l.active ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
                 </td>
                 <td className="admin-actions">
                   {editingId === l.id ? (
