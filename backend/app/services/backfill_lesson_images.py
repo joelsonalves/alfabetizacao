@@ -41,6 +41,23 @@ def backfill_lesson_images(db: Session) -> int:
     return count
 
 
+def backfill_lesson_images_force(db: Session) -> int:
+    """Recalcula image_url de TODAS as lições.
+
+    Apenas lições cujo image_url difere do valor resolvido são atualizadas,
+    preservando edições manuais feitas via admin.
+    """
+    count = 0
+    lessons = db.query(Lesson).all()
+    for lesson in lessons:
+        resolved = resolve_image_for_lesson(lesson.lesson_type, lesson.target)
+        if resolved and lesson.image_url != resolved:
+            lesson.image_url = resolved
+            count += 1
+    db.commit()
+    return count
+
+
 def backfill_association_words(db: Session) -> int:
     count = 0
     lessons = db.query(Lesson).filter(
@@ -57,13 +74,19 @@ def backfill_association_words(db: Session) -> int:
 
 
 def main():
+    import sys
     db = SessionLocal()
     try:
-        count = backfill_lesson_images(db)
-        print(f"Backfill complete: {count} lessons updated.")
+        if "--force" in sys.argv:
+            count = backfill_lesson_images_force(db)
+            print(f"Force backfill complete: {count} lessons updated.")
+        else:
+            count = backfill_lesson_images(db)
+            print(f"Backfill complete: {count} lessons updated.")
     finally:
         db.close()
 
 
 if __name__ == "__main__":
     main()
+
