@@ -9,7 +9,7 @@ async def test_unsplash_returns_non_200(client):
     mock_resp.status_code = 403
 
     with patch("app.config.settings.unsplash_access_key", "mock-key"):
-        with patch("app.routes.images.httpx.AsyncClient") as mock_cls:
+        with patch("app.services.images.httpx.AsyncClient") as mock_cls:
             mock_client = AsyncMock()
             mock_cls.return_value = mock_client
             mock_client.__aenter__.return_value = mock_client
@@ -28,7 +28,7 @@ async def test_unsplash_returns_empty_data(client):
     mock_resp.json = MagicMock(return_value=[])
 
     with patch("app.config.settings.unsplash_access_key", "mock-key"):
-        with patch("app.routes.images.httpx.AsyncClient") as mock_cls:
+        with patch("app.services.images.httpx.AsyncClient") as mock_cls:
             mock_client = AsyncMock()
             mock_cls.return_value = mock_client
             mock_client.__aenter__.return_value = mock_client
@@ -38,4 +38,4 @@ async def test_unsplash_returns_empty_data(client):
             assert response.status_code == 200
             data = response.json()
             assert data["type"] == "emoji"
-            assert data["value"] == "🖼️"
+            assert data["value"] == "🏠"

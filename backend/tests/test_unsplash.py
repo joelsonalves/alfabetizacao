@@ -18,7 +18,7 @@ async def test_word_image_with_unsplash_key(client):
     }])
 
     with patch("app.config.settings.unsplash_access_key", "mock-key"):
-        with patch("app.routes.images.httpx.AsyncClient") as mock_cls:
+        with patch("app.services.images.httpx.AsyncClient") as mock_cls:
             mock_client = AsyncMock()
             mock_cls.return_value = mock_client
             mock_client.__aenter__.return_value = mock_client
@@ -34,7 +34,7 @@ async def test_word_image_with_unsplash_key(client):
 @pytest.mark.asyncio
 async def test_word_image_unsplash_api_error(client):
     with patch("app.config.settings.unsplash_access_key", "mock-key"):
-        with patch("app.routes.images.httpx.AsyncClient") as mock_cls:
+        with patch("app.services.images.httpx.AsyncClient") as mock_cls:
             mock_client = AsyncMock()
             mock_cls.return_value = mock_client
             mock_client.__aenter__.return_value = mock_client
@@ -51,7 +51,7 @@ async def test_word_image_unsplash_non_200(client):
     mock_resp = _make_mock_response(403)
 
     with patch("app.config.settings.unsplash_access_key", "mock-key"):
-        with patch("app.routes.images.httpx.AsyncClient") as mock_cls:
+        with patch("app.services.images.httpx.AsyncClient") as mock_cls:
             mock_client = AsyncMock()
             mock_cls.return_value = mock_client
             mock_client.__aenter__.return_value = mock_client
