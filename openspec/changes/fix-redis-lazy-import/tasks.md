@@ -11,3 +11,11 @@
 - [x] 2.2 Reiniciar o backend e confirmar que o healthcheck responde em `GET /api/health`
 - [x] 2.3 Verificar que o frontend carrega sem "Carregando..." eterno
 - [x] 2.4 Testar que rotas com cache funcionam sem Redis (cache desabilitado silenciosamente)
+
+## 3. Adicionar Redis como dependência do backend no docker-compose
+
+- [x] 3.1 Adicionar `redis:` com `condition: service_healthy` ao `depends_on` do serviço `backend` no `docker-compose.yml`
+- [x] 3.2 Subir todos os containers com `docker compose up -d`
+- [x] 3.3 Verificar que Redis está saudável: `docker compose ps` mostra `alfabetizacao-cache (healthy)`
+- [x] 3.4 Verificar que backend está saudável e conectado ao Redis
+- [ ] 3.5 Fazer commit da alteração
