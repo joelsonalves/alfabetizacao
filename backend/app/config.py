@@ -10,6 +10,15 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     unsplash_access_key: str = ""
 
+    # Redis
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_db: int = 0
+    redis_password: str = ""
+    redis_ttl_config: int = 300
+    redis_ttl_catalog: int = 3600
+    redis_enabled: bool = True
+
     class Config:
         env_file = ".env"
 

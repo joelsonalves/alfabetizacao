@@ -1,26 +1,10 @@
 import { useCallback, useRef, useEffect, useState } from 'react'
-
-export const LETTER_SOUNDS = {
-  'A': 'a', 'E': 'é', 'I': 'i', 'O': 'ó', 'U': 'u',
-  'B': 'bê', 'C': 'cê', 'D': 'dê', 'F': 'éfi', 'G': 'gê',
-  'H': 'agá', 'J': 'jóta', 'K': 'cá', 'L': 'éli', 'M': 'ême',
-  'N': 'êni', 'P': 'pê', 'Q': 'quê', 'R': 'érre', 'S': 'ésse',
-  'T': 'tê', 'V': 'vê', 'W': 'dábliu', 'X': 'xis', 'Y': 'ípsilon',
-  'Z': 'zê',
-}
-
-export const LETTER_WORDS = {
-  'A': 'abelha', 'B': 'basquete', 'C': 'cachorro', 'D': 'dado', 'E': 'estrela',
-  'F': 'fogo', 'G': 'gato', 'H': 'hospital', 'I': 'iguana', 'J': 'jacaré',
-  'K': 'kiwi', 'L': 'limão', 'M': 'maçã', 'N': 'nota', 'O': 'olho',
-  'P': 'pinguim', 'Q': 'queijo', 'R': 'rato', 'S': 'sol', 'T': 'tartaruga',
-  'U': 'unicórnio', 'V': 'vaca',   'W': 'waffle', 'X': 'xis', 'Y': 'ioiô', 'Z': 'zebra',
-}
+import { LETTER_SOUNDS, LETTER_WORDS } from '../constants/speech'
 
 const TTS_LANG = import.meta.env.VITE_TTS_LANG || 'pt-BR'
 const TTS_LANG_PREFIX = TTS_LANG.split('-')[0]
 
-export function useSpeech() {
+export function useSpeech({ rate = 0.9, pitch = 1.0 } = {}) {
   const [voices, setVoices] = useState([])
   const [ptVoice, setPtVoice] = useState(null)
   const [supported, setSupported] = useState(true)
@@ -60,8 +44,8 @@ export function useSpeech() {
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.voice = ptVoice
     utterance.lang = ptVoice.lang || TTS_LANG
-    utterance.rate = 0.9
-    utterance.pitch = 1.0
+    utterance.rate = rate
+    utterance.pitch = pitch
 
     utterance.onend = () => {
       setIsSpeaking(false)
@@ -71,7 +55,7 @@ export function useSpeech() {
 
     utteranceRef.current = utterance
     window.speechSynthesis.speak(utterance)
-  }, [ptVoice])
+  }, [ptVoice, rate, pitch])
 
   const speakLetter = useCallback((letter) => {
     const sound = LETTER_SOUNDS[letter.toUpperCase()] || letter
@@ -86,11 +70,11 @@ export function useSpeech() {
     speak(word.toLowerCase())
   }, [speak])
 
-  const speakLetterWithWord = useCallback((letter) => {
+  const speakLetterWithWord = useCallback((letter, word) => {
     const upper = letter.toUpperCase()
-    const word = LETTER_WORDS[upper]
-    if (word) {
-      const capitalized = word.charAt(0).toUpperCase() + word.slice(1)
+    const association = word || LETTER_WORDS[upper]
+    if (association) {
+      const capitalized = association.charAt(0).toUpperCase() + association.slice(1)
       speak(`${upper}... de ${capitalized}.`)
     } else {
       const sound = LETTER_SOUNDS[upper] || upper

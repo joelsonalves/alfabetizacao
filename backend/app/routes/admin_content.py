@@ -30,16 +30,30 @@ class EmojiMappingItem(BaseModel):
     label: str
 
 
+class CatalogItem(BaseModel):
+    emoji: str
+    label: str
+    mapped: bool
+
+
+class CatalogCategory(BaseModel):
+    key: str
+    name: str
+    icon: str
+    items: list[CatalogItem]
+
+
 class EmojiMappingsResponse(BaseModel):
     letters: list[EmojiMappingItem]
     syllables: list[EmojiMappingItem]
     words: list[EmojiMappingItem]
     phrases: list[EmojiMappingItem]
+    catalog: list[CatalogCategory]
 
 
 @router.get("/emoji-mappings", response_model=EmojiMappingsResponse)
 def list_emoji_mappings(_admin=Depends(require_admin)):
-    from app.services.images import EMOJI_MAP, SYLLABLE_EMOJI_MAP, WORD_EMOJI_MAP
+    from app.services.images import EMOJI_MAP, SYLLABLE_EMOJI_MAP, WORD_EMOJI_MAP, EMOJI_CATALOG, is_emoji_mapped
 
     def mapping(d, category, label_fmt):
         return [EmojiMappingItem(key=k, emoji=v, label=label_fmt(k))
@@ -53,11 +67,25 @@ def list_emoji_mappings(_admin=Depends(require_admin)):
         else:
             word_items.append(EmojiMappingItem(key=k, emoji=v, label=f"Palavra {k}"))
 
+    catalog = [
+        CatalogCategory(
+            key=cat_key,
+            name=cat_data["name"],
+            icon=cat_data["icon"],
+            items=[
+                CatalogItem(emoji=e, label=l, mapped=is_emoji_mapped(e))
+                for e, l in cat_data["items"]
+            ],
+        )
+        for cat_key, cat_data in EMOJI_CATALOG.items()
+    ]
+
     return EmojiMappingsResponse(
         letters=mapping(EMOJI_MAP, "letter", lambda k: f"Letra {k}"),
         syllables=mapping(SYLLABLE_EMOJI_MAP, "syllable", lambda k: f"Sílaba {k}"),
         words=word_items,
         phrases=phrase_items,
+        catalog=catalog,
     )
 
 

@@ -1,4 +1,14 @@
 import pytest
+from app.models.achievement import AchievementDefinition
+
+
+@pytest.fixture(autouse=True)
+def seed_definitions(db_session):
+    for atype in ("primeira_letra", "perfeito"):
+        exists = db_session.query(AchievementDefinition).filter(AchievementDefinition.achievement_type == atype).first()
+        if not exists:
+            db_session.add(AchievementDefinition(achievement_type=atype, name=atype.capitalize()))
+    db_session.commit()
 
 
 @pytest.mark.asyncio
@@ -48,6 +58,15 @@ async def test_list_achievements_with_data(client, auth_headers):
     types = [a["achievement_type"] for a in data]
     assert "primeira_letra" in types
     assert "perfeito" in types
+
+
+@pytest.mark.asyncio
+async def test_non_definition_achievement_fails(client, auth_headers):
+    response = await client.post(
+        "/api/progress/achievements/tipo_inexistente",
+        headers=auth_headers,
+    )
+    assert response.status_code == 400
 
 
 @pytest.mark.asyncio

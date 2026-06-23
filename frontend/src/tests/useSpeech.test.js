@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useSpeech, LETTER_SOUNDS, LETTER_WORDS } from '../hooks/useSpeech'
+import { useSpeech } from '../hooks/useSpeech'
+import { LETTER_SOUNDS, LETTER_WORDS } from '../constants/speech'
 
 const mockVoices = [
   { lang: 'pt-BR', name: 'Maria' },

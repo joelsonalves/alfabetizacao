@@ -6,10 +6,11 @@ import { LETTER_SOUNDS, LETTER_WORDS } from '../constants/speech'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useKeyboard } from '../hooks/useKeyboard'
 import { useAuth } from '../hooks/useAuth'
+import { useScoringRules, getPointsForLessonType, getTimeoutForLessonType, getPointsPerKey, getTtsRate, getTtsPitch } from '../hooks/useScoringRules'
 import VirtualKeyboard from '../components/VirtualKeyboard/VirtualKeyboard'
 import LevelUp from '../components/LevelUp/LevelUp'
 import SyllableBlending from '../components/SyllableBlending/SyllableBlending'
-import { POINTS, SPEECH_PREFIXES, SPEECH_TYPE_LABELS, SPEECH_TYPE_NAMES, SPEECH_TIMEOUTS } from '../constants/lesson'
+import { SPEECH_PREFIXES, SPEECH_TYPE_LABELS, SPEECH_TYPE_NAMES } from '../constants/lesson'
 import { normalize, stripSpaces, getExpectedChar } from '../utils/string'
 import { isSubsequence } from '../utils/array'
 import { tryExtractTarget, extractSpokenContent } from '../utils/speech'
@@ -40,7 +41,8 @@ export default function Lesson() {
   const [moduleCompletedLessons, setModuleCompletedLessons] = useState(new Set())
   const [blendingCompleted, setBlendingCompleted] = useState(false)
 
-  const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported, isSpeaking } = useSpeech()
+  const { rules } = useScoringRules()
+  const { speak, speakLetter, speakSyllable, speakWord, speakLetterWithWord, supported: ttsSupported, isSpeaking } = useSpeech({ rate: getTtsRate(rules), pitch: getTtsPitch(rules) })
   const { isListening, supported: srSupported, startListening, stopListening } = useSpeechRecognition()
 
   const [feedbacks, setFeedbacks] = useState([])
@@ -70,6 +72,7 @@ export default function Lesson() {
     onKeyPress,
     target: lesson?.target || '',
     lessonType: lesson?.lesson_type || '',
+    pointsPerKey: getPointsPerKey(rules),
   })
 
   const prevTypedChars = useRef('')
@@ -83,7 +86,7 @@ export default function Lesson() {
       setLessonCompleted(true)
       const currentLesson = lessonRef.current
       setModuleCompletedLessons(prev => new Set(prev).add(currentLesson.id))
-      const points = (POINTS[currentLesson?.lesson_type] || 10) + speechScore
+      const points = getPointsForLessonType(currentLesson?.lesson_type, rules) + speechScore
       const accuracy = kb.attempts > 0 ? Math.round(((kb.attempts - kb.errors) / kb.attempts) * 100) : 100
       const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
 
@@ -188,7 +191,7 @@ export default function Lesson() {
       return
     }
     setSpeechNoResult(false)
-    const timeout = SPEECH_TIMEOUTS[lesson?.lesson_type] || 4000
+    const timeout = getTimeoutForLessonType(lesson?.lesson_type, rules)
     startListening(
       (transcript) => {
         setSpeechNoResult(false)
@@ -374,7 +377,7 @@ export default function Lesson() {
                   <span className="checklist-desc">"{lesson.lesson_type === 'review'
                     ? lesson.target.split('').join(' ')
                     : lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant'
-                      ? `${lesson.target} → de ${(LETTER_WORDS[lesson.target?.toUpperCase()] || lesson.target).replace(/^./, m => m.toUpperCase())}`
+                      ? `${lesson.target} → de ${(lesson.association_word || LETTER_WORDS[lesson.target?.toUpperCase()] || lesson.target).replace(/^./, m => m.toUpperCase())}`
                       : lesson.target}"</span>
                 </div>
                 <div className={`checklist-item ${speechCorrect ? 'done' : ''}`}>
@@ -408,7 +411,7 @@ export default function Lesson() {
                           }).join('. ') + '.'
                           speak(sentence)
                         } else if (lesson.lesson_type === 'letter' || lesson.lesson_type === 'consonant') {
-                          speakLetterWithWord(lesson.target)
+                          speakLetterWithWord(lesson.target, lesson.association_word)
                         } else {
                           speakWord(lesson.target)
                         }

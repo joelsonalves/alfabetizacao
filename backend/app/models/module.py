@@ -27,6 +27,7 @@ class Lesson(Base):
     image_active = Column(Boolean, default=True)
     alt_text = Column(String(500), nullable=True)
     placeholder_text = Column(String(500), nullable=True)
+    association_word = Column(String(100), nullable=True)
 
 
 class LessonImage(Base):

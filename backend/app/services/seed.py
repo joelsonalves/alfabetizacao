@@ -5,6 +5,7 @@ from app.services.images import (
     get_emoji_for_syllable,
     get_emoji_for_word,
     get_emoji_for_text,
+    get_association_for_letter,
 )
 
 CONSONANTS = ["B", "C", "D", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z"]
@@ -75,6 +76,7 @@ def get_lesson_image_fields(lesson_type: str, target: str) -> dict:
         emoji = get_emoji_for_letter(target)
         fields["image_url"] = emoji
         fields["alt_text"] = f"Emoji da letra {target.upper()}" if emoji else None
+        fields["association_word"] = get_association_for_letter(target)
     elif lesson_type == "syllable":
         emoji = get_emoji_for_syllable(target)
         fields["image_url"] = emoji

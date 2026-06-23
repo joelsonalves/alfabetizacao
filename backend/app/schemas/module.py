@@ -41,6 +41,7 @@ class LessonResponse(BaseModel):
     image_active: bool = True
     alt_text: str | None = None
     placeholder_text: str | None = None
+    association_word: str | None = None
 
     class Config:
         from_attributes = True
@@ -58,6 +59,7 @@ class LessonCreate(BaseModel):
     image_active: bool = True
     alt_text: str | None = None
     placeholder_text: str | None = None
+    association_word: str | None = None
 
 
 class LessonUpdate(BaseModel):
@@ -71,6 +73,7 @@ class LessonUpdate(BaseModel):
     image_active: bool | None = None
     alt_text: str | None = None
     placeholder_text: str | None = None
+    association_word: str | None = None
 
 
 class ProgressUpdate(BaseModel):

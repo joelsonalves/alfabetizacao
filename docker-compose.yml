@@ -35,6 +35,9 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       UNSPLASH_ACCESS_KEY: ${UNSPLASH_ACCESS_KEY:-}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_ENABLED: "true"
     ports:
       - "8000:8000"
     healthcheck:
@@ -62,5 +65,20 @@ services:
       VITE_API_URL: ${VITE_API_URL:-/api}
       VITE_TTS_LANG: ${VITE_TTS_LANG:-pt-BR}
 
+  redis:
+    image: redis:7-alpine
+    container_name: alfabetizacao-cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data:
+  redis_data:

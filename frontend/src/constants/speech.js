@@ -12,5 +12,5 @@ export const LETTER_WORDS = {
   'F': 'fogo', 'G': 'gato', 'H': 'hospital', 'I': 'iguana', 'J': 'jacaré',
   'K': 'kiwi', 'L': 'limão', 'M': 'maçã', 'N': 'nota', 'O': 'olho',
   'P': 'pinguim', 'Q': 'queijo', 'R': 'rato', 'S': 'sol', 'T': 'tartaruga',
-  'U': 'unicórnio', 'V': 'vaca',   'W': 'waffle', 'X': 'xis', 'Y': 'ioiô', 'Z': 'zebra',
+  'U': 'unicórnio', 'V': 'vaca',   'W': 'web', 'X': 'xícara', 'Y': 'ioiô', 'Z': 'zebra',
 }

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.models.progress import UserProgress, Achievement, Session as UserSession
+from app.models.achievement import AchievementDefinition
 from app.models.module import Lesson
 from app.schemas.module import ProgressUpdate, ProgressResponse, AchievementResponse
 from app.routes.auth import get_current_user
@@ -75,6 +76,13 @@ def unlock_achievement(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    definition = db.query(AchievementDefinition).filter(
+        AchievementDefinition.achievement_type == achievement_type,
+        AchievementDefinition.active == True,
+    ).first()
+    if not definition:
+        raise HTTPException(status_code=400, detail="Tipo de conquista inválido ou inativo")
+
     existing = db.query(Achievement).filter(
         Achievement.user_id == user.id,
         Achievement.achievement_type == achievement_type,

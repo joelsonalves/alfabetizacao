@@ -3,7 +3,7 @@ import { ABNT2_KEYS } from '../constants/keyboard'
 import { normalizeKey, getExpectedChar as getExpectedCharFromString } from '../utils/string'
 import { createSyntheticKeyboardEvent } from '../utils/keyboard'
 
-export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, lessonType }) {
+export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, lessonType, pointsPerKey = 10 }) {
   const [pressedKey, setPressedKey] = useState(null)
   const [typedChars, setTypedChars] = useState('')
   const [score, setScore] = useState(0)
@@ -44,7 +44,7 @@ export function useKeyboard({ onKeyPress, onKeyCorrect, onKeyWrong, target, less
       setAttempts(a => a + 1)
       if (normalizeKey(key) === normalizeKey(expected)) {
         setTypedChars(prev => prev + expected)
-        setScore(s => s + 10)
+        setScore(s => s + pointsPerKey)
         if (onKeyCorrect) onKeyCorrect(expected)
 
         const newTyped = typedChars + expected

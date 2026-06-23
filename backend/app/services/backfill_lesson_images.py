@@ -7,6 +7,7 @@ from app.services.images import (
     get_emoji_for_syllable,
     get_emoji_for_word,
     get_emoji_for_text,
+    get_association_for_letter,
 )
 
 
@@ -22,6 +23,12 @@ def resolve_image_for_lesson(lesson_type: str, target: str) -> str | None:
     return None
 
 
+def resolve_association_for_lesson(lesson_type: str, target: str) -> str | None:
+    if lesson_type in ("letter", "consonant"):
+        return get_association_for_letter(target)
+    return None
+
+
 def backfill_lesson_images(db: Session) -> int:
     count = 0
     lessons = db.query(Lesson).filter(Lesson.image_url.is_(None)).all()
@@ -29,6 +36,21 @@ def backfill_lesson_images(db: Session) -> int:
         url = resolve_image_for_lesson(lesson.lesson_type, lesson.target)
         if url:
             lesson.image_url = url
+            count += 1
+    db.commit()
+    return count
+
+
+def backfill_association_words(db: Session) -> int:
+    count = 0
+    lessons = db.query(Lesson).filter(
+        Lesson.lesson_type.in_(["letter", "consonant"]),
+        Lesson.association_word.is_(None),
+    ).all()
+    for lesson in lessons:
+        word = resolve_association_for_lesson(lesson.lesson_type, lesson.target)
+        if word:
+            lesson.association_word = word
             count += 1
     db.commit()
     return count

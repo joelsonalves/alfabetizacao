@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.routes import auth, modules, progress, images, admin, admin_content, feature_flags
+from app.routes import auth, modules, progress, images, admin, admin_content, feature_flags, config
 from app.services.auth import decode_access_token
 from app.services.cleanup import clean_expired_blocklist
 
@@ -100,15 +100,20 @@ app.include_router(images.router, prefix="/api/images", tags=["images"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(admin_content.router, prefix="/api/admin", tags=["admin_content"])
 app.include_router(feature_flags.router, prefix="/api/feature-flags", tags=["feature_flags"])
+app.include_router(config.router, prefix="/api", tags=["config"])
 
 
 @app.get("/api/health")
 def health_check(db: Session = Depends(get_db)):
+    from app.services.cache import cache
+
     db_status = "ok"
     try:
         db.execute(text("SELECT 1"))
     except Exception:
         db_status = "error"
+
+    redis_status = "ok" if cache._connect() else "unavailable"
 
     if db_status == "error":
         raise HTTPException(status_code=503, detail="Database connection failed")
@@ -117,6 +122,7 @@ def health_check(db: Session = Depends(get_db)):
         "status": "ok",
         "service": "alfabetizacao-multissensorial",
         "database": db_status,
+        "redis": redis_status,
         "uptime_seconds": int(time.time() - START_TIME),
     }
 

@@ -195,9 +195,9 @@ function ContentTab() {
   const [lessons, setLessons] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
+  const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '', association_word: '' })
   const [showCreate, setShowCreate] = useState(false)
-  const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
+  const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '', association_word: '' })
   const [showPicker, setShowPicker] = useState(false)
   const [pickerTarget, setPickerTarget] = useState(null)
 
@@ -221,7 +221,7 @@ function ContentTab() {
 
   const startEdit = (l) => {
     setEditingId(l.id)
-    setEditForm({ name: l.name, target: l.target, lesson_type: l.lesson_type, active: l.active, sort_order: l.sort_order, image_url: l.image_url || '', image_active: l.image_active !== false, alt_text: l.alt_text || '', placeholder_text: l.placeholder_text || '' })
+    setEditForm({ name: l.name, target: l.target, lesson_type: l.lesson_type, active: l.active, sort_order: l.sort_order, image_url: l.image_url || '', image_active: l.image_active !== false, alt_text: l.alt_text || '', placeholder_text: l.placeholder_text || '', association_word: l.association_word || '' })
   }
 
   const saveEdit = async (id) => {
@@ -244,7 +244,7 @@ function ContentTab() {
   const createLesson = async () => {
     await api.admin.createLesson({ ...createForm, module_id: Number(moduleId) })
     setShowCreate(false)
-    setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
+    setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '', association_word: '' })
     loadLessons(moduleId)
   }
 
@@ -333,6 +333,10 @@ function ContentTab() {
           <div className="form-group">
             <label>Placeholder</label>
             <input value={createForm.placeholder_text} onChange={e => setCreateForm(f => ({ ...f, placeholder_text: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>Palavra Associada</label>
+            <input value={createForm.association_word} onChange={e => setCreateForm(f => ({ ...f, association_word: e.target.value }))} placeholder="Ex: web" />
           </div>
           <div className="form-actions">
             <button className="btn btn-primary" onClick={createLesson}>Criar</button>
@@ -426,6 +430,10 @@ function ContentTab() {
                       <div className="form-group">
                         <label>Placeholder</label>
                         <input value={editForm.placeholder_text} onChange={e => setEditForm(f => ({ ...f, placeholder_text: e.target.value }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Palavra Associada</label>
+                        <input value={editForm.association_word} onChange={e => setEditForm(f => ({ ...f, association_word: e.target.value }))} placeholder="Ex: web" />
                       </div>
                       <div className="edit-actions">
                         <button className="btn btn-sm btn-primary" onClick={() => saveEdit(l.id)}>Salvar</button>

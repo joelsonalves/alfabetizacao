@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.module import LearningModule, Lesson
 from app.schemas.module import ModuleResponse, LessonResponse
+from app.services.cache import cache
 
 router = APIRouter()
 lesson_router = APIRouter()
@@ -11,7 +13,11 @@ lesson_router = APIRouter()
 
 @router.get("", response_model=list[ModuleResponse])
 def list_modules(db: Session = Depends(get_db)):
+    cached = cache.get_json("modules:all")
+    if cached is not None:
+        return [ModuleResponse(**item) for item in cached]
     modules = db.query(LearningModule).order_by(LearningModule.sort_order).all()
+    cache.set("modules:all", [ModuleResponse.model_validate(m).model_dump() for m in modules], ttl=settings.redis_ttl_catalog)
     return [ModuleResponse.model_validate(m) for m in modules]
 
 
