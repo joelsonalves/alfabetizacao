@@ -6,6 +6,7 @@ from app.services.seed import (
     generate_phrases,
     generate_sentences,
     get_modules_with_lessons,
+    get_lesson_image_fields,
     CONSONANTS,
     VOWELS,
 )
@@ -97,3 +98,46 @@ class TestGetModulesWithLessons:
     def test_consonants_have_21_lessons(self):
         modules = get_modules_with_lessons()
         assert len(modules[1]["lessons"]) == 21
+
+
+class TestGetLessonImageFields:
+    def test_letter_returns_emoji(self):
+        fields = get_lesson_image_fields("letter", "A")
+        assert fields["image_url"] == "🐝"
+        assert fields["alt_text"] == "Emoji da letra A"
+        assert fields["image_active"] is True
+
+    def test_consonant_returns_emoji(self):
+        fields = get_lesson_image_fields("consonant", "P")
+        assert fields["image_url"] == "🐧"
+        assert fields["alt_text"] == "Emoji da letra P"
+
+    def test_syllable_returns_emoji(self):
+        fields = get_lesson_image_fields("syllable", "BA")
+        assert fields["image_url"] == "🍬"
+        assert fields["alt_text"] == "Emoji da sílaba BA"
+
+    def test_word_returns_emoji(self):
+        fields = get_lesson_image_fields("word", "CASA")
+        assert fields["image_url"] == "🏠"
+
+    def test_blending_returns_emoji(self):
+        fields = get_lesson_image_fields("blending", "CASA")
+        assert fields["image_url"] == "🏠"
+
+    def test_phrase_returns_emoji(self):
+        fields = get_lesson_image_fields("phrase", "O GATO BEBE")
+        assert fields["image_url"] == "🐱"
+
+    def test_sentence_returns_emoji(self):
+        fields = get_lesson_image_fields("sentence", "O GATO BEBEU LEITE.")
+        assert fields["image_url"] == "🐱"
+
+    def test_review_has_no_image(self):
+        fields = get_lesson_image_fields("review", "AEIOU")
+        assert fields["image_url"] is None
+        assert fields["image_active"] is True
+
+    def test_unknown_type_has_no_image(self):
+        fields = get_lesson_image_fields("unknown", "XYZ")
+        assert fields["image_url"] is None

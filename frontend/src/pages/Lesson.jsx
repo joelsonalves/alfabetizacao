@@ -165,8 +165,10 @@ export default function Lesson() {
       }
       setModuleCompletedLessons(completedSet)
 
-      if (l.image_url) {
+      if (l.image_url && l.image_active !== false) {
         setImageData({ type: 'emoji', value: l.image_url, alt: l.alt_text || l.target })
+      } else if (l.image_url && l.image_active === false) {
+        setImageData({ type: 'hidden', placeholder: l.placeholder_text || 'Imagem oculta' })
       } else if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
         api.images.emoji(l.target).then(setImageData).catch(() => {})
       } else if (l.lesson_type === 'syllable') {
@@ -322,13 +324,18 @@ export default function Lesson() {
         ) : (
           <>
             <div className="lesson-target-area">
-              {imageData && (
+              {imageData && imageData.type !== 'hidden' && (
                 <div className="lesson-image">
                   {imageData.type === 'emoji' ? (
                     <span className="lesson-emoji">{imageData.value}</span>
                   ) : (
                     <img src={imageData.url} alt={imageData.alt || lesson.target} className="lesson-real-image" />
                   )}
+                </div>
+              )}
+              {imageData && imageData.type === 'hidden' && (
+                <div className="lesson-image-hidden">
+                  <span className="placeholder-text">{imageData.placeholder}</span>
                 </div>
               )}
 

@@ -194,9 +194,9 @@ function ContentTab() {
   const [lessons, setLessons] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0 })
+  const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
   const [showCreate, setShowCreate] = useState(false)
-  const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0 })
+  const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
 
   useEffect(() => {
     api.admin.listModules().then(setModules).catch(() => {})
@@ -218,7 +218,7 @@ function ContentTab() {
 
   const startEdit = (l) => {
     setEditingId(l.id)
-    setEditForm({ name: l.name, target: l.target, lesson_type: l.lesson_type, active: l.active, sort_order: l.sort_order })
+    setEditForm({ name: l.name, target: l.target, lesson_type: l.lesson_type, active: l.active, sort_order: l.sort_order, image_url: l.image_url || '', image_active: l.image_active !== false, alt_text: l.alt_text || '', placeholder_text: l.placeholder_text || '' })
   }
 
   const saveEdit = async (id) => {
@@ -241,17 +241,33 @@ function ContentTab() {
   const createLesson = async () => {
     await api.admin.createLesson({ ...createForm, module_id: Number(moduleId) })
     setShowCreate(false)
-    setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0 })
+    setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
     loadLessons(moduleId)
+  }
+
+  const backfillImages = async () => {
+    if (!window.confirm('Re-resolver imagens de todas as lições? Lições com image_url personalizado não serão alteradas.')) return
+    try {
+      const result = await api.admin.backfillImages()
+      alert(`${result.updated} lições atualizadas.`)
+      loadLessons(moduleId)
+    } catch {
+      alert('Erro ao re-resolver imagens.')
+    }
   }
 
   return (
     <div className="admin-content">
       <div className="admin-header-row">
         <h2>Conteúdo</h2>
-        {moduleId && (
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Novo Item</button>
-        )}
+        <div className="admin-header-actions">
+          {moduleId && (
+            <>
+              <button className="btn btn-secondary" onClick={backfillImages}>🔄 Re-resolver imagens</button>
+              <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Novo Item</button>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="form-group">
@@ -283,6 +299,24 @@ function ContentTab() {
             <label>Ordem</label>
             <input type="number" value={createForm.sort_order} onChange={e => setCreateForm(f => ({ ...f, sort_order: Number(e.target.value) }))} />
           </div>
+          <div className="form-group">
+            <label>URL da Imagem</label>
+            <input value={createForm.image_url} onChange={e => setCreateForm(f => ({ ...f, image_url: e.target.value }))} placeholder="Ex: 🐝 ou https://..." />
+          </div>
+          <div className="form-group checkbox-group">
+            <label>
+              <input type="checkbox" checked={createForm.image_active} onChange={e => setCreateForm(f => ({ ...f, image_active: e.target.checked }))} />
+              Exibir imagem
+            </label>
+          </div>
+          <div className="form-group">
+            <label>Texto Alternativo</label>
+            <input value={createForm.alt_text} onChange={e => setCreateForm(f => ({ ...f, alt_text: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>Placeholder</label>
+            <input value={createForm.placeholder_text} onChange={e => setCreateForm(f => ({ ...f, placeholder_text: e.target.value }))} />
+          </div>
           <div className="form-actions">
             <button className="btn btn-primary" onClick={createLesson}>Criar</button>
             <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancelar</button>
@@ -299,6 +333,8 @@ function ContentTab() {
               <th>Target</th>
               <th>Tipo</th>
               <th>Ordem</th>
+              <th>Imagem</th>
+              <th>Exibir</th>
               <th>Ativo</th>
               <th>Ações</th>
             </tr>
@@ -323,23 +359,59 @@ function ContentTab() {
                     <input type="number" value={editForm.sort_order} onChange={e => setEditForm(f => ({ ...f, sort_order: Number(e.target.value) }))} />
                   ) : l.sort_order}
                 </td>
+                <td className="admin-image-cell">
+                  {editingId === l.id ? (
+                    <input value={editForm.image_url} onChange={e => setEditForm(f => ({ ...f, image_url: e.target.value }))} placeholder="Emoji ou URL" />
+                  ) : (
+                    <span title={l.image_url || ''}>{l.image_url ? (l.image_url.length > 8 ? l.image_url.slice(0, 8) + '…' : l.image_url) : '—'}</span>
+                  )}
+                </td>
                 <td>
-                  <div className="status-cell">
+                  {editingId === l.id ? (
                     <label className="toggle-switch">
-                      <input type="checkbox" checked={l.active} onChange={() => toggleActive(l.id, l.active)} />
+                      <input type="checkbox" checked={editForm.image_active} onChange={e => setEditForm(f => ({ ...f, image_active: e.target.checked }))} />
                       <span className="toggle-slider"></span>
                     </label>
-                    <span className={`status-badge ${l.active ? 'active' : 'inactive'}`}>
-                      {l.active ? 'Ativo' : 'Inativo'}
+                  ) : (
+                    <span className={`status-badge ${l.image_active !== false ? 'active' : 'inactive'}`}>
+                      {l.image_active !== false ? 'Sim' : 'Não'}
                     </span>
-                  </div>
+                  )}
+                </td>
+                <td>
+                  {editingId === l.id ? (
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={editForm.active} onChange={e => setEditForm(f => ({ ...f, active: e.target.checked }))} />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  ) : (
+                    <div className="status-cell">
+                      <label className="toggle-switch">
+                        <input type="checkbox" checked={l.active} onChange={() => toggleActive(l.id, l.active)} />
+                        <span className="toggle-slider"></span>
+                      </label>
+                      <span className={`status-badge ${l.active ? 'active' : 'inactive'}`}>
+                        {l.active ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </div>
+                  )}
                 </td>
                 <td className="admin-actions">
                   {editingId === l.id ? (
-                    <>
-                      <button className="btn btn-sm btn-primary" onClick={() => saveEdit(l.id)}>Salvar</button>
-                      <button className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)}>Cancelar</button>
-                    </>
+                    <div className="edit-fields-compact">
+                      <div className="form-group">
+                        <label>Alt text</label>
+                        <input value={editForm.alt_text} onChange={e => setEditForm(f => ({ ...f, alt_text: e.target.value }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Placeholder</label>
+                        <input value={editForm.placeholder_text} onChange={e => setEditForm(f => ({ ...f, placeholder_text: e.target.value }))} />
+                      </div>
+                      <div className="edit-actions">
+                        <button className="btn btn-sm btn-primary" onClick={() => saveEdit(l.id)}>Salvar</button>
+                        <button className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)}>Cancelar</button>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <button className="btn btn-sm btn-ghost" onClick={() => startEdit(l)}>Editar</button>

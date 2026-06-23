@@ -8,6 +8,7 @@ import Lesson from '../pages/Lesson'
 const mockLesson = {
   id: 1, module_id: 1, name: 'Vogal A', lesson_type: 'letter',
   target: 'A', content: null, sort_order: 1,
+  image_url: '🐝', image_active: true, alt_text: 'Letra A', placeholder_text: '',
 }
 
 const mockModule = { id: 1, name: 'Vogais', module_type: 'vowel', description: '', sort_order: 1 }
@@ -305,6 +306,51 @@ describe('Lesson page', () => {
 
     api.modules.getLesson = origGetLesson
     api.modules.lessons = origLessons
+  })
+
+  it('hides image when image_active is false', async () => {
+    const hiddenLesson = {
+      ...mockLesson,
+      image_url: '🐝',
+      image_active: false,
+      placeholder_text: 'Imagem oculta pelo admin',
+    }
+
+    const { api } = await import('../services/api')
+    const origGetLesson = api.modules.getLesson
+    api.modules.getLesson = () => Promise.resolve(hiddenLesson)
+
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Imagem oculta pelo admin')).toBeInTheDocument()
+    })
+
+    api.modules.getLesson = origGetLesson
+  })
+
+  it('shows image when image_active is true', async () => {
+    render(
+      <MemoryRouter initialEntries={['/lesson/1/1']}>
+        <Routes>
+          <Route path="/lesson/:moduleId/:lessonId" element={<Lesson />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Vogais')).toBeInTheDocument()
+    })
+
+    const emoji = document.querySelector('.lesson-emoji')
+    expect(emoji).toBeTruthy()
+    expect(emoji.textContent).toBe('🐝')
   })
 
   it('shows retry error on conflict', async () => {

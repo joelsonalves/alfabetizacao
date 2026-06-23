@@ -1,15 +1,27 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.module import LearningModule, Lesson
 from app.schemas.module import ModuleResponse, ModuleCreate, ModuleUpdate, LessonResponse, LessonCreate, LessonUpdate
 from app.routes.auth import require_admin
+from app.services.backfill_lesson_images import backfill_lesson_images
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+class BackfillResponse(BaseModel):
+    updated: int
+
+
+@router.post("/lessons/backfill-images", response_model=BackfillResponse)
+def backfill_images(_admin=Depends(require_admin), db: Session = Depends(get_db)):
+    count = backfill_lesson_images(db)
+    return BackfillResponse(updated=count)
 
 
 @router.get("/modules", response_model=list[ModuleResponse])

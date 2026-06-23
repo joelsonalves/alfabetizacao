@@ -39,6 +39,21 @@
   margin-bottom: 20px;
 }
 
+.lesson-image-hidden {
+  margin-bottom: 20px;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.placeholder-text {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
 .lesson-emoji {
   font-size: 5rem;
   display: block;

@@ -129,5 +129,6 @@ export const api = {
     createLesson: (data) => request('/admin/lessons', { method: 'POST', body: JSON.stringify(data) }),
     updateLesson: (id, data) => request(`/admin/lessons/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     deleteLesson: (id) => request(`/admin/lessons/${id}`, { method: 'DELETE' }),
+    backfillImages: () => request('/admin/lessons/backfill-images', { method: 'POST' }),
   },
 }

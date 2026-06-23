@@ -77,7 +77,7 @@ WORD_EMOJI_MAP = {
     "brasil": "🇧🇷", "prato": "🍽️", "flor": "🌸", "trator": "🚜",
     "cachorro": "🐕", "elefante": "🐘", "abacaxi": "🍍",
     "borboleta": "🦋", "girassol": "🌻", "chocolate": "🍫",
-    "janela": "🪟", "cavalo": "🐴",
+    "janela": "🪟", "cavalo": "🐴", "pássaro": "🐦",
     # extra image query words
     "bebe": "👶", "bicho": "🐛", "burro": "🐴", "braco": "💪", "creme": "🧴",
     # phrases
