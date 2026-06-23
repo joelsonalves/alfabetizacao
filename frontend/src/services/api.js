@@ -130,5 +130,6 @@ export const api = {
     updateLesson: (id, data) => request(`/admin/lessons/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     deleteLesson: (id) => request(`/admin/lessons/${id}`, { method: 'DELETE' }),
     backfillImages: () => request('/admin/lessons/backfill-images', { method: 'POST' }),
+    listEmojiMappings: () => request('/admin/emoji-mappings'),
   },
 }

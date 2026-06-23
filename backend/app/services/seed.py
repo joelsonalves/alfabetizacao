@@ -62,6 +62,7 @@ SENTENCES_DATA = [
 
 CMS_DEFAULTS = {
     "active": True,
+    "image_url": None,
     "image_active": True,
     "alt_text": None,
     "placeholder_text": None,

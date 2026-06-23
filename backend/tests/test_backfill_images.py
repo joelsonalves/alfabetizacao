@@ -1,6 +1,27 @@
 import pytest
 from app.models.module import LearningModule, Lesson
+from app.models.user import User
 from app.services.backfill_lesson_images import backfill_lesson_images, resolve_image_for_lesson
+from app.services.auth import hash_password, create_access_token
+
+
+@pytest.fixture
+def admin_user(db_session):
+    user = User(
+        name="Admin",
+        email="admin@teste.com",
+        password_hash=hash_password("123456"),
+        is_admin=True,
+    )
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def admin_headers(admin_user):
+    token = create_access_token({"sub": admin_user.id, "email": admin_user.email})
+    return {"Authorization": f"Bearer {token}"}
 
 
 def _seed_lesson(db_session, lesson_type="letter", target="A", image_url=None):
@@ -80,28 +101,28 @@ class TestAdminBackfillEndpoint:
     @pytest.mark.asyncio
     async def test_requires_auth(self, client):
         response = await client.post("/api/admin/lessons/backfill-images")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
     @pytest.mark.asyncio
-    async def test_returns_updated_count(self, client, db_session, auth_headers):
+    async def test_returns_updated_count(self, client, db_session, admin_headers):
         _seed_lesson(db_session, "letter", "A", image_url=None)
         _seed_lesson(db_session, "word", "CASA", image_url=None)
 
         response = await client.post(
             "/api/admin/lessons/backfill-images",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["updated"] == 2
 
     @pytest.mark.asyncio
-    async def test_no_updates_when_all_populated(self, client, db_session, auth_headers):
+    async def test_no_updates_when_all_populated(self, client, db_session, admin_headers):
         _seed_lesson(db_session, "letter", "A", image_url="🐝")
 
         response = await client.post(
             "/api/admin/lessons/backfill-images",
-            headers=auth_headers,
+            headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()

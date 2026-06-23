@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../services/api'
+import EmojiPicker from '../components/EmojiPicker/EmojiPicker'
 import './Admin.css'
 
 function FlagsTab() {
@@ -197,6 +198,8 @@ function ContentTab() {
   const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
   const [showCreate, setShowCreate] = useState(false)
   const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
+  const [showPicker, setShowPicker] = useState(false)
+  const [pickerTarget, setPickerTarget] = useState(null)
 
   useEffect(() => {
     api.admin.listModules().then(setModules).catch(() => {})
@@ -243,6 +246,17 @@ function ContentTab() {
     setShowCreate(false)
     setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '' })
     loadLessons(moduleId)
+  }
+
+  const handleEmojiSelect = (emoji, label) => {
+    const target = pickerTarget
+    setShowPicker(false)
+    setPickerTarget(null)
+    if (target === 'create') {
+      setCreateForm(f => ({ ...f, image_url: emoji, alt_text: label || emoji }))
+    } else if (target) {
+      setEditForm(f => ({ ...f, image_url: emoji, alt_text: label || emoji }))
+    }
   }
 
   const backfillImages = async () => {
@@ -301,7 +315,10 @@ function ContentTab() {
           </div>
           <div className="form-group">
             <label>URL da Imagem</label>
-            <input value={createForm.image_url} onChange={e => setCreateForm(f => ({ ...f, image_url: e.target.value }))} placeholder="Ex: 🐝 ou https://..." />
+            <div className="input-with-button">
+              <input value={createForm.image_url} onChange={e => setCreateForm(f => ({ ...f, image_url: e.target.value }))} placeholder="Ex: 🐝 ou https://..." />
+              <button type="button" className="btn btn-small" onClick={() => { setPickerTarget('create'); setShowPicker(true) }}>📂 Escolher</button>
+            </div>
           </div>
           <div className="form-group checkbox-group">
             <label>
@@ -361,7 +378,10 @@ function ContentTab() {
                 </td>
                 <td className="admin-image-cell">
                   {editingId === l.id ? (
-                    <input value={editForm.image_url} onChange={e => setEditForm(f => ({ ...f, image_url: e.target.value }))} placeholder="Emoji ou URL" />
+                    <div className="input-with-button">
+                      <input value={editForm.image_url} onChange={e => setEditForm(f => ({ ...f, image_url: e.target.value }))} placeholder="Emoji ou URL" />
+                      <button type="button" className="btn btn-small" onClick={() => { setPickerTarget(l.id); setShowPicker(true) }}>📂</button>
+                    </div>
                   ) : (
                     <span title={l.image_url || ''}>{l.image_url ? (l.image_url.length > 8 ? l.image_url.slice(0, 8) + '…' : l.image_url) : '—'}</span>
                   )}
@@ -423,6 +443,12 @@ function ContentTab() {
             ))}
           </tbody>
         </table>
+      )}
+      {showPicker && (
+        <EmojiPicker
+          onSelect={handleEmojiSelect}
+          onClose={() => { setShowPicker(false); setPickerTarget(null) }}
+        />
       )}
     </div>
   )

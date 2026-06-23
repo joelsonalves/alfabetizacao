@@ -24,6 +24,43 @@ def backfill_images(_admin=Depends(require_admin), db: Session = Depends(get_db)
     return BackfillResponse(updated=count)
 
 
+class EmojiMappingItem(BaseModel):
+    key: str
+    emoji: str
+    label: str
+
+
+class EmojiMappingsResponse(BaseModel):
+    letters: list[EmojiMappingItem]
+    syllables: list[EmojiMappingItem]
+    words: list[EmojiMappingItem]
+    phrases: list[EmojiMappingItem]
+
+
+@router.get("/emoji-mappings", response_model=EmojiMappingsResponse)
+def list_emoji_mappings(_admin=Depends(require_admin)):
+    from app.services.images import EMOJI_MAP, SYLLABLE_EMOJI_MAP, WORD_EMOJI_MAP
+
+    def mapping(d, category, label_fmt):
+        return [EmojiMappingItem(key=k, emoji=v, label=label_fmt(k))
+                for k, v in sorted(d.items())]
+
+    word_items = []
+    phrase_items = []
+    for k, v in sorted(WORD_EMOJI_MAP.items()):
+        if " " in k:
+            phrase_items.append(EmojiMappingItem(key=k, emoji=v, label=f"Frase: {k}"))
+        else:
+            word_items.append(EmojiMappingItem(key=k, emoji=v, label=f"Palavra {k}"))
+
+    return EmojiMappingsResponse(
+        letters=mapping(EMOJI_MAP, "letter", lambda k: f"Letra {k}"),
+        syllables=mapping(SYLLABLE_EMOJI_MAP, "syllable", lambda k: f"Sílaba {k}"),
+        words=word_items,
+        phrases=phrase_items,
+    )
+
+
 @router.get("/modules", response_model=list[ModuleResponse])
 def list_modules(_admin=Depends(require_admin), db: Session = Depends(get_db)):
     modules = db.query(LearningModule).order_by(LearningModule.sort_order).all()
