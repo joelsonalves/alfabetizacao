@@ -1,7 +1,7 @@
 ## 1. Adicionar force backfill
 
-- [ ] 1.1 Adicionar função `backfill_lesson_images_force(db)` em `backend/app/services/backfill_lesson_images.py`
-- [ ] 1.2 Adicionar flag `--force` ao `main()` do script
+- [x] 1.1 Adicionar função `backfill_lesson_images_force(db)` em `backend/app/services/backfill_lesson_images.py`
+- [x] 1.2 Adicionar flag `--force` ao `main()` do script
 
 ## 2. Executar e verificar
 

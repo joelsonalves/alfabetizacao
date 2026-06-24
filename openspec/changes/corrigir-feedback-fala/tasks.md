@@ -21,8 +21,8 @@
 
 ## 6. Corrigir TTS para usar mensagens estruturadas com displayTarget
 
-- [ ] 6.1 Substituir `speak(\`Você falou ${content}. Parabéns!\`)` por `speak(\`Muito bem! Você acertou a letra ${displayTarget}.\`)` (linha 257)
-- [ ] 6.2 Substituir `speak(\`Você falou ${content}. Vamos tentar novamente!\`)` por `speak(\`Quase! Tente novamente. A letra é ${displayTarget}.\`)` (linha 262)
+- [x] 6.1 Substituir `speak(\`Você falou ${content}. Parabéns!\`)` por `speak(\`Muito bem! Você acertou a letra ${displayTarget}.\`)` (linha 257) — já implementado
+- [x] 6.2 Substituir `speak(\`Você falou ${content}. Vamos tentar novamente!\`)` por `speak(\`Quase! Tente novamente. A letra é ${displayTarget}.\`)` (linha 262) — já implementado
 
 ## 5. Verificar e testar
 

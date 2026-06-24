@@ -737,7 +737,12 @@ def get_emoji_for_text(text: str) -> str | None:
         return emoji
     words = cleaned.split()
     for word in words:
-        if word.lower() in ("o", "a", "os", "as", "um", "uma", "de", "da", "do", "em", "no", "na"):
+        if word.lower() in (
+            "o", "a", "os", "as", "um", "uma", "de", "da", "do", "em", "no", "na",
+            "meu", "minha", "meus", "minhas", "teu", "tua", "teus", "tuas",
+            "seu", "sua", "seus", "suas", "nosso", "nossa", "nossos", "nossas",
+            "é", "são", "tem", "têm", "com", "para", "por",
+        ):
             continue
         emoji = get_emoji_for_word(word)
         if emoji:

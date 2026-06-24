@@ -11,15 +11,15 @@
 
 ## 3. Correção — Lição 248 (cadeira em contexto inadequado)
 
-- [ ] 3.1 Expandir a lista de *stop words* em `backend/app/services/images.py` (função `get_emoji_for_text`) para incluir:
+- [x] 3.1 Expandir a lista de *stop words* em `backend/app/services/images.py` (função `get_emoji_for_text`) para incluir:
   - Pronomes possessivos: `meu`, `minha`, `meus`, `minhas`, `teu`, `tua`, `teus`, `tuas`, `seu`, `sua`, `seus`, `suas`, `nosso`, `nossa`, `nossos`, `nossas`
   - Verbos comuns: `é`, `são`, `tem`, `têm`
   - Outros: `com`, `para`, `por`
-- [ ] 3.2 Adicionar as mesmas *stop words* no mapeamento equivalente em `backend/app/services/seed.py` (função `get_lesson_image_fields`).
+- [x] 3.2 Adicionar as mesmas *stop words* no mapeamento equivalente em `backend/app/services/seed.py` (função `get_lesson_image_fields`) — já coberto pelo uso de `get_emoji_for_text()` de images.py
 
 ## 4. Correção — Letra X (❌ inadequado)
 
-- [ ] 4.1 Alterar `EMOJI_MAP["X"]` em `backend/app/services/images.py` de `❌` para `☕`.
+- [x] 4.1 Alterar `EMOJI_MAP["X"]` em `backend/app/services/images.py` de `❌` para `☕` — já implementado
 - [ ] 4.2 Executar backfill ("Re-resolver imagens" no admin) para propagar a correção para o banco.
 
 ## 5. Verificação
