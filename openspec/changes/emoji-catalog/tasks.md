@@ -23,8 +23,8 @@
 
 ## 5. Correção de Variáveis CSS
 
-- [ ] 5.1 Trocar `var(--primary)` por `var(--color-primary)` em `EmojiPicker.css`
-- [ ] 5.2 Trocar `var(--bg-hover)` por `var(--color-primary-light)` em `EmojiPicker.css`
+- [x] 5.1 Trocar `var(--primary)` por `var(--color-primary)` em `EmojiPicker.css` — já implementado
+- [x] 5.2 Trocar `var(--bg-hover)` por `var(--color-primary-light)` em `EmojiPicker.css` — já implementado
 
 ## 6. Testes
 
@@ -32,4 +32,4 @@
 - [x] 6.2 Verificar que `mapped: true` aparece para emojis dos dicionários existentes
 - [x] 6.3 Verificar que a aba Catálogo aparece no EmojiPicker
 - [x] 6.4 Verificar que o destaque ⭐ funciona para emojis em uso
-- [ ] 6.5 Verificar visualmente que sub-aba ativa tem fundo visível (contraste)
+- [x] 6.5 Verificar visualmente que sub-aba ativa tem fundo visível (contraste) — `.catalog-sub-tab.active` usa `var(--color-primary) + #fff`

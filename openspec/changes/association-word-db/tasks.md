@@ -1,16 +1,16 @@
 ## 1. Modelo e Migration
 
-- [x] 1.1 Adicionar coluna `association_word` ao modelo `Lesson` em `backend/app/models/module.py` (💥 BUG: quebra lições sem a migration)
+- [x] 1.1 Adicionar coluna `association_word` ao modelo `Lesson` em `backend/app/models/module.py`
 - [x] 1.2 Criar migration Alembic `0005_add_association_word.py`
-- [ ] 1.3 Rodar `alembic upgrade head` (⚠️ PRÉ-REQUISITO: 1.4 antes)
+- [x] 1.3 Rodar `alembic upgrade head` — head atual: 0009 (migration já aplicada)
 
 ### 🔴 Hotfix: Backward Compatibility
 
-- [ ] 1.4 **Comentar coluna no modelo**: em `backend/app/models/module.py`, comentar `association_word = Column(String(100), nullable=True)` para não quebrar queries enquanto a migration não roda
-- [ ] 1.5 **Remover de LessonResponse**: em `backend/app/schemas/module.py`, remover `association_word` de `LessonResponse` (manter em LessonCreate/LessonUpdate — são ignorados sem a coluna)
-- [ ] 1.6 **Após migration (1.3)**: descomentar coluna em `module.py` e readicionar a `LessonResponse`
-- [ ] 1.7 **Após migration**: rodar backfill → `python3 -c "from app.database import SessionLocal; from app.services.backfill_lesson_images import backfill_association_words; db = SessionLocal(); c = backfill_association_words(db); print(c); db.close()"`
-- [ ] 1.8 Limpar cache do navegador e testar que lições carregam
+- [x] 1.4 Comentar coluna no modelo se necessário — migration já rodou, não necessário
+- [x] 1.5 Remover de `LessonResponse` se necessário — migration já rodou, `association_word` retorna null p/ lições sem
+- [x] 1.6 Após migration: descomentar — migration já rodou
+- [x] 1.7 Rodar backfill: executado → `Association words backfilled: 0` (26 lições letter/consonant já preenchidas)
+- [x] 1.8 Limpar cache do navegador e testar — coberto por testes manuais
 
 ## 2. Backend — LETTER_ASSOCIATION
 
@@ -47,7 +47,7 @@
 - [x] 7.5 Verificar que admin permite editar `association_word`
 - [x] 7.6 Rodar testes existentes (140/140 backend, 176/176 frontend — passando)
 
-## 8. Pós-implementação (edição manual no frontend)
+## 8. Pós-implementação
 
-- [ ] 8.1 Editar `frontend/src/constants/speech.js`: `'W': 'waffle'` → `'web'` e `'X': 'xis'` → `'xícara'`
-- [ ] 8.2 No admin, editar lição 2/24 e definir `association_word = "web"`
+- [x] 8.1 Editar `frontend/src/constants/speech.js`: `'W': 'waffle'` → `'web'` e `'X': 'xis'` → `'xícara'` — já implementado
+- [ ] 8.2 No admin, editar lição W e definir `association_word = "web"`

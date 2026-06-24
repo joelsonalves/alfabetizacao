@@ -26,7 +26,7 @@
 
 ## 8. Frontend — Navbar link "Ajuda" verifica feature_tutorial
 
-- [ ] 8.1 Em `frontend/src/components/Layout/Layout.jsx`: importar `useFeatureFlags`, consumir `isActive`, e renderizar condicionalmente o link "❓ Ajuda" com `isActive('feature_tutorial')`
+- [x] 8.1 Em `frontend/src/components/Layout/Layout.jsx`: importar `useFeatureFlags`, consumir `isActive`, e renderizar condicionalmente o link "❓ Ajuda" com `isActive('feature_tutorial')` — já implementado (linha 37: `{isActive('feature_tutorial') && <Link to="/tutorial" ...>}`)
 
 ## 9. Verificação
 

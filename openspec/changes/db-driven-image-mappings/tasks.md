@@ -32,20 +32,11 @@
 
 ## Fase 5: Seletor visual de emojis (EmojiPicker)
 
-- [ ] 5.1 Criar rota `GET /admin/emoji-mappings` em `admin_content.py` que consolida `EMOJI_MAP`, `SYLLABLE_EMOJI_MAP`, e `WORD_EMOJI_MAP` em resposta agrupada.
-- [ ] 5.2 Criar componente `EmojiPicker.jsx` com:
-  - Modal overlay com fundo semi-transparente.
-  - Quatro abas: Letras, Sílabas, Palavras, Frases.
-  - Grid responsivo de emojis (emoji + label).
-  - Campo de busca com filtro em tempo real.
-  - Botão "✕ Fechar" e clique fora para dismiss.
-  - Callback `onSelect(emoji, label)` ao clicar num emoji.
-- [ ] 5.3 Criar `EmojiPicker.css` com estilos do modal, grid, abas e busca.
-- [ ] 5.4 Adicionar método `listEmojiMappings()` em `api.js` (`admin` namespace).
-- [ ] 5.5 Integrar EmojiPicker no `Admin.jsx`:
-  - Estado `showPicker` e `pickerTarget` ('edit' | 'create').
-  - Botão "📂 Escolher" ao lado do campo `image_url` no formulário de edição e criação.
-  - `handleEmojiSelect()` que preenche `image_url` e `alt_text`.
+- [x] 5.1 Criar rota `GET /admin/emoji-mappings` em `admin_content.py` que consolida `EMOJI_MAP`, `SYLLABLE_EMOJI_MAP`, e `WORD_EMOJI_MAP` em resposta agrupada. — implementado no change emoji-catalog
+- [x] 5.2 Criar componente `EmojiPicker.jsx` com modal, abas, grid, busca e callback — implementado no change emoji-catalog
+- [x] 5.3 Criar `EmojiPicker.css` com estilos do modal, grid, abas e busca — implementado no change emoji-catalog
+- [x] 5.4 Adicionar método `listEmojiMappings()` em `api.js` (`admin` namespace) — linha 136
+- [x] 5.5 Integrar EmojiPicker no `Admin.jsx` com showPicker, pickerTarget, handleEmojiSelect — importado e integrado
 
 ## Fase 6: Testes
 
@@ -54,5 +45,5 @@
 - [x] 6.3 Testar `POST /admin/lessons/backfill-images` (sucesso, erro 403 sem admin).
 - [x] 6.4 Testar que `Lesson.jsx` renderiza `image_url` diretamente sem chamadas de API.
 - [x] 6.5 Testar que `image_active = false` oculta a imagem.
-- [ ] 6.6 Testar `GET /admin/emoji-mappings` retorna estrutura esperada.
-- [ ] 6.7 Testar que EmojiPicker abre/fecha e seleciona emoji corretamente.
+- [ ] 6.6 Testar `GET /admin/emoji-mappings` retorna estrutura esperada — coberto por emoji-catalog, mas sem teste automatizado específico
+- [ ] 6.7 Testar que EmojiPicker abre/fecha e seleciona emoji corretamente — coberto por emoji-catalog, mas sem teste automatizado específico
