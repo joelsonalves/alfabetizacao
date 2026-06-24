@@ -109,8 +109,8 @@ export default function Lesson() {
           }
           if (data.level > prevLevel) {
             setLevelUp({ level: data.level, xp: data.xp })
-            if (setUser) setUser(u => u ? { ...u, level: data.level, xp: data.xp } : u)
           }
+          if (setUser) setUser(u => u ? { ...u, level: data.level, xp: data.xp } : u)
           setRetryError(null)
           setShowResult(true)
         }).catch((err) => {
