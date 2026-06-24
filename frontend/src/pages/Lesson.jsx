@@ -6,6 +6,7 @@ import { LETTER_SOUNDS, LETTER_WORDS } from '../constants/speech'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useKeyboard } from '../hooks/useKeyboard'
 import { useAuth } from '../hooks/useAuth'
+import { useFeatureFlags } from '../hooks/useFeatureFlags'
 import { useScoringRules, getPointsForLessonType, getTimeoutForLessonType, getPointsPerKey, getTtsRate, getTtsPitch } from '../hooks/useScoringRules'
 import VirtualKeyboard from '../components/VirtualKeyboard/VirtualKeyboard'
 import LevelUp from '../components/LevelUp/LevelUp'
@@ -33,7 +34,9 @@ export default function Lesson() {
   const [speechNoResult, setSpeechNoResult] = useState(false)
   const [levelUp, setLevelUp] = useState(null)
   const [retryError, setRetryError] = useState(null)
+  const [disabledModule, setDisabledModule] = useState(null)
   const { user, setUser } = useAuth()
+  const { isActive: isFlagActive } = useFeatureFlags()
 
   const [hasListened, setHasListened] = useState(false)
   const [hasSpoken, setHasSpoken] = useState(false)
@@ -97,6 +100,7 @@ export default function Lesson() {
           stars,
           completed: true,
           attempts: 1,
+          errors: kb.errors,
         }).then((data) => {
           if (data && data.__conflict) {
             setRetryError('Não foi possível salvar o progresso. Tente novamente.')
@@ -142,6 +146,7 @@ export default function Lesson() {
     setModuleCompletedLessons(new Set())
     setFeedbacks([])
     setRetryError(null)
+    setDisabledModule(null)
     setBlendingCompleted(false)
     prevTypedChars.current = ''
 
@@ -168,21 +173,33 @@ export default function Lesson() {
       }
       setModuleCompletedLessons(completedSet)
 
-      if (l.image_url && l.image_active !== false) {
-        setImageData({ type: 'emoji', value: l.image_url, alt: l.alt_text || l.target })
-      } else if (l.image_url && l.image_active === false) {
+      const policy = l.image_policy || 'auto'
+      if (policy === 'none') {
         setImageData({ type: 'hidden', placeholder: l.placeholder_text || 'Imagem oculta' })
-      } else if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
-        api.images.emoji(l.target).then(setImageData).catch(() => {})
-      } else if (l.lesson_type === 'syllable') {
-        api.images.syllable(l.target).then(setImageData).catch(() => {})
-      } else if (l.lesson_type === 'word') {
-        api.images.word(l.target).then(setImageData).catch(() => {})
-      } else if (l.lesson_type === 'phrase' || l.lesson_type === 'sentence') {
-        api.images.text(l.target).then(setImageData).catch(() => {})
+      } else if (policy === 'custom') {
+        if (l.image_url) {
+          setImageData({ type: 'emoji', value: l.image_url, alt: l.alt_text || l.target })
+        }
+      } else {
+        if (l.image_url) {
+          setImageData({ type: 'emoji', value: l.image_url, alt: l.alt_text || l.target })
+        } else if (l.lesson_type === 'letter' || l.lesson_type === 'consonant') {
+          api.images.emoji(l.target).then(setImageData).catch(() => {})
+        } else if (l.lesson_type === 'syllable') {
+          api.images.syllable(l.target).then(setImageData).catch(() => {})
+        } else if (l.lesson_type === 'word') {
+          api.images.word(l.target).then(setImageData).catch(() => {})
+        } else if (l.lesson_type === 'phrase' || l.lesson_type === 'sentence') {
+          api.images.text(l.target).then(setImageData).catch(() => {})
+        }
       }
-    }).catch(console.error)
-      .finally(() => setLoading(false))
+    }).catch((err) => {
+      if (err.message === 'Module is disabled by administrator') {
+        setDisabledModule(true)
+      } else {
+        console.error(err)
+      }
+    }).finally(() => setLoading(false))
   }, [lessonId])
 
   const handleSpeech = () => {
@@ -275,6 +292,18 @@ export default function Lesson() {
   }, [showResult, levelUp])
 
   if (loading) return <div className="loading">Carregando...</div>
+  if (disabledModule) return (
+    <div className="lesson fade-in">
+      <div className="module-disabled">
+        <div className="module-disabled-icon">🔒</div>
+        <h2>Módulo Indisponível</h2>
+        <p>Este módulo foi desativado pelo administrador.</p>
+        <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>
+          Ir para o Dashboard
+        </button>
+      </div>
+    </div>
+  )
   if (!lesson) return <div className="loading">Lição não encontrada</div>
 
   const displayChar = lesson?.target || ''
@@ -487,7 +516,7 @@ export default function Lesson() {
           </button>
         </div>
       )}
-      {levelUp && (
+      {levelUp && isFlagActive('feature_level_up') && (
         <LevelUp
           level={levelUp.level}
           xp={levelUp.xp}

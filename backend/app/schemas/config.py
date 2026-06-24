@@ -68,3 +68,13 @@ class AchievementDefinitionUpdate(BaseModel):
     icon: str | None = None
     criteria: str | None = None
     active: bool | None = None
+
+
+class AchievementDefinitionPublic(BaseModel):
+    achievement_type: str
+    name: str
+    description: str | None = None
+    icon: str | None = None
+
+    class Config:
+        from_attributes = True

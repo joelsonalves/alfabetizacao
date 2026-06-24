@@ -74,6 +74,19 @@
 .achievement-name {
   font-size: 0.9rem;
   font-weight: 500;
+  display: block;
+}
+.achievement-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+.achievement-date {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 6px;
 }
 
 .loading-text, .empty-text {

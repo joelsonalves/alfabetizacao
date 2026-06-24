@@ -312,3 +312,31 @@
   font-weight: 700;
   color: var(--color-primary);
 }
+
+.module-disabled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 50vh;
+}
+
+.module-disabled-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.module-disabled h2 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin-bottom: 12px;
+}
+
+.module-disabled p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  max-width: 400px;
+}

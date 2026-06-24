@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.user import FeatureFlag
 from app.schemas.feature_flag import FeatureFlagResponse, FeatureFlagUpdate
 from app.routes.auth import require_admin
+from app.services.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -31,4 +32,7 @@ def update_feature_flag(key: str, data: FeatureFlagUpdate, _admin=Depends(requir
         flag.description = data.description
     db.commit()
     db.refresh(flag)
+    cache.delete("feature_flags:all")
+    if key.startswith("dashboard_module_"):
+        cache.delete("modules:all")
     return FeatureFlagResponse.model_validate(flag)

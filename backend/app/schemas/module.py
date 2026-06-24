@@ -28,6 +28,9 @@ class ModuleUpdate(BaseModel):
     sort_order: int | None = None
 
 
+VALID_IMAGE_POLICIES = {"auto", "none", "custom"}
+
+
 class LessonResponse(BaseModel):
     id: int
     module_id: int
@@ -39,6 +42,7 @@ class LessonResponse(BaseModel):
     active: bool = True
     image_url: str | None = None
     image_active: bool = True
+    image_policy: str = "auto"
     alt_text: str | None = None
     placeholder_text: str | None = None
     association_word: str | None = None
@@ -57,6 +61,7 @@ class LessonCreate(BaseModel):
     active: bool = True
     image_url: str | None = None
     image_active: bool = True
+    image_policy: str = "auto"
     alt_text: str | None = None
     placeholder_text: str | None = None
     association_word: str | None = None
@@ -71,6 +76,7 @@ class LessonUpdate(BaseModel):
     active: bool | None = None
     image_url: str | None = None
     image_active: bool | None = None
+    image_policy: str | None = None
     alt_text: str | None = None
     placeholder_text: str | None = None
     association_word: str | None = None
@@ -81,6 +87,7 @@ class ProgressUpdate(BaseModel):
     stars: int
     completed: bool
     attempts: int
+    errors: int = 0
     version: int | None = None
 
 

@@ -7,4 +7,4 @@
 
 - [x] 2.1 Rodar `docker compose exec backend python -m app.services.backfill_lesson_images --force`
 - [x] 2.2 Verificar que a lição 113 (WA) agora mostra 🌐 em vez de 🐺
-- [ ] 2.3 Fazer commit da alteração
+- [x] 2.3 Fazer commit da alteração

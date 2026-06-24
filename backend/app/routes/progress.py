@@ -10,6 +10,7 @@ from app.models.module import Lesson
 from app.schemas.module import ProgressUpdate, ProgressResponse, AchievementResponse
 from app.routes.auth import get_current_user
 from app.services.progress import calculate_level, check_version_conflict, apply_progress_update
+from app.services.achievements import check_and_unlock_achievements
 
 router = APIRouter()
 
@@ -41,6 +42,14 @@ def update_progress(
         )
 
     apply_progress_update(progress, data)
+
+    if data.completed:
+        check_and_unlock_achievements(
+            lesson, user.id, db,
+            data_errors=data.errors,
+            score_attempts=data.attempts,
+            stars=data.stars,
+        )
 
     user.xp += data.score
 

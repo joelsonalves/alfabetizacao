@@ -6,6 +6,7 @@ import './Profile.css'
 export default function Profile() {
   const { user } = useAuth()
   const [achievements, setAchievements] = useState([])
+  const [definitions, setDefinitions] = useState({})
   const [progress, setProgress] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -13,9 +14,13 @@ export default function Profile() {
     Promise.all([
       api.progress.achievements(),
       api.progress.get(),
-    ]).then(([ach, prog]) => {
+      api.achievements.definitions().catch(() => []),
+    ]).then(([ach, prog, defs]) => {
       setAchievements(ach)
       setProgress(prog)
+      const defMap = {}
+      defs.forEach(d => { defMap[d.achievement_type] = d })
+      setDefinitions(defMap)
     }).catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -72,12 +77,17 @@ export default function Profile() {
           <p className="empty-text">Nenhuma conquista ainda. Continue praticando!</p>
         ) : (
           <div className="achievements-grid">
-            {achievements.map(ach => (
-              <div key={ach.id} className="achievement-card card">
-                <span className="achievement-icon">🏅</span>
-                <span className="achievement-name">{ach.achievement_type}</span>
-              </div>
-            ))}
+            {achievements.map(ach => {
+              const def = definitions[ach.achievement_type]
+              return (
+                <div key={ach.id} className="achievement-card card">
+                  <span className="achievement-icon">{def?.icon || '🏅'}</span>
+                  <span className="achievement-name">{def?.name || ach.achievement_type}</span>
+                  {def?.description && <span className="achievement-desc">{def.description}</span>}
+                  <span className="achievement-date">{new Date(ach.unlocked_at).toLocaleDateString('pt-BR')}</span>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

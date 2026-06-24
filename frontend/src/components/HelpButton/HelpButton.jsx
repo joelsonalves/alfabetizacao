@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSpeech } from '../../hooks/useSpeech'
+import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import './HelpButton.css'
 
 const HELP_TIPS = {
@@ -33,6 +34,7 @@ export default function HelpButton({ context = 'default' }) {
   const [open, setOpen] = useState(false)
   const tip = HELP_TIPS[context] || HELP_TIPS.default
   const { speak, supported: ttsSupported } = useSpeech()
+  const { isActive } = useFeatureFlags()
 
   useEffect(() => {
     if (!open) return
@@ -48,6 +50,8 @@ export default function HelpButton({ context = 'default' }) {
       speak(`${tip.title}: ${tip.text}`)
     }
   }, [open, tip.title, tip.text, speak, ttsSupported])
+
+  if (!isActive('feature_help_button')) return null
 
   return (
     <>

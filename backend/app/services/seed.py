@@ -65,6 +65,7 @@ CMS_DEFAULTS = {
     "active": True,
     "image_url": None,
     "image_active": True,
+    "image_policy": "auto",
     "alt_text": None,
     "placeholder_text": None,
 }

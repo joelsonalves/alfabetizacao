@@ -109,6 +109,9 @@ export const api = {
     achievements: () => request('/progress/achievements'),
     unlockAchievement: (type) => request(`/progress/achievements/${type}`, { method: 'POST' }),
   },
+  achievements: {
+    definitions: () => request('/achievement-definitions'),
+  },
   images: {
     emoji: (letter) => request(`/images/emoji/${encodeURIComponent(letter)}`),
     word: (word) => request(`/images/word/${encodeURIComponent(word)}`),
@@ -131,5 +134,9 @@ export const api = {
     deleteLesson: (id) => request(`/admin/lessons/${id}`, { method: 'DELETE' }),
     backfillImages: () => request('/admin/lessons/backfill-images', { method: 'POST' }),
     listEmojiMappings: () => request('/admin/emoji-mappings'),
+    listAchievements: () => request('/admin/achievements'),
+    createAchievement: (data) => request('/admin/achievements', { method: 'POST', body: JSON.stringify(data) }),
+    updateAchievement: (type, data) => request(`/admin/achievements/${type}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteAchievement: (type) => request(`/admin/achievements/${type}`, { method: 'DELETE' }),
   },
 }

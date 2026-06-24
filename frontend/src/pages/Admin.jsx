@@ -195,9 +195,9 @@ function ContentTab() {
   const [lessons, setLessons] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '', association_word: '' })
+  const [editForm, setEditForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, image_policy: 'auto', alt_text: '', placeholder_text: '', association_word: '' })
   const [showCreate, setShowCreate] = useState(false)
-  const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '', association_word: '' })
+  const [createForm, setCreateForm] = useState({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, image_policy: 'auto', alt_text: '', placeholder_text: '', association_word: '' })
   const [showPicker, setShowPicker] = useState(false)
   const [pickerTarget, setPickerTarget] = useState(null)
 
@@ -221,7 +221,7 @@ function ContentTab() {
 
   const startEdit = (l) => {
     setEditingId(l.id)
-    setEditForm({ name: l.name, target: l.target, lesson_type: l.lesson_type, active: l.active, sort_order: l.sort_order, image_url: l.image_url || '', image_active: l.image_active !== false, alt_text: l.alt_text || '', placeholder_text: l.placeholder_text || '', association_word: l.association_word || '' })
+    setEditForm({ name: l.name, target: l.target, lesson_type: l.lesson_type, active: l.active, sort_order: l.sort_order, image_url: l.image_url || '', image_active: l.image_active !== false, image_policy: l.image_policy || 'auto', alt_text: l.alt_text || '', placeholder_text: l.placeholder_text || '', association_word: l.association_word || '' })
   }
 
   const saveEdit = async (id) => {
@@ -244,7 +244,7 @@ function ContentTab() {
   const createLesson = async () => {
     await api.admin.createLesson({ ...createForm, module_id: Number(moduleId) })
     setShowCreate(false)
-    setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, alt_text: '', placeholder_text: '', association_word: '' })
+    setCreateForm({ name: '', target: '', lesson_type: '', active: true, sort_order: 0, image_url: '', image_active: true, image_policy: 'auto', alt_text: '', placeholder_text: '', association_word: '' })
     loadLessons(moduleId)
   }
 
@@ -320,11 +320,13 @@ function ContentTab() {
               <button type="button" className="btn btn-small" onClick={() => { setPickerTarget('create'); setShowPicker(true) }}>📂 Escolher</button>
             </div>
           </div>
-          <div className="form-group checkbox-group">
-            <label>
-              <input type="checkbox" checked={createForm.image_active} onChange={e => setCreateForm(f => ({ ...f, image_active: e.target.checked }))} />
-              Exibir imagem
-            </label>
+          <div className="form-group">
+            <label>Política da Imagem</label>
+            <select value={createForm.image_policy} onChange={e => setCreateForm(f => ({ ...f, image_policy: e.target.value }))}>
+              <option value="auto">🔄 Auto — Resolver automaticamente</option>
+              <option value="none">🚫 Nenhuma — Não mostrar imagem</option>
+              <option value="custom">✏️ Personalizada — Usar imagem selecionada</option>
+            </select>
           </div>
           <div className="form-group">
             <label>Texto Alternativo</label>
@@ -355,7 +357,7 @@ function ContentTab() {
               <th>Tipo</th>
               <th>Ordem</th>
               <th>Imagem</th>
-              <th>Exibir</th>
+              <th>Política</th>
               <th>Ativo</th>
               <th>Ações</th>
             </tr>
@@ -392,13 +394,14 @@ function ContentTab() {
                 </td>
                 <td>
                   {editingId === l.id ? (
-                    <label className="toggle-switch">
-                      <input type="checkbox" checked={editForm.image_active} onChange={e => setEditForm(f => ({ ...f, image_active: e.target.checked }))} />
-                      <span className="toggle-slider"></span>
-                    </label>
+                    <select value={editForm.image_policy} onChange={e => setEditForm(f => ({ ...f, image_policy: e.target.value }))}>
+                      <option value="auto">Auto</option>
+                      <option value="none">Nenhuma</option>
+                      <option value="custom">Personalizada</option>
+                    </select>
                   ) : (
-                    <span className={`status-badge ${l.image_active !== false ? 'active' : 'inactive'}`}>
-                      {l.image_active !== false ? 'Sim' : 'Não'}
+                    <span className={`status-badge ${l.image_policy === 'none' ? 'inactive' : l.image_policy === 'custom' ? 'warning' : 'active'}`}>
+                      {l.image_policy === 'none' ? 'Nenhuma' : l.image_policy === 'custom' ? 'Personalizada' : 'Auto'}
                     </span>
                   )}
                 </td>
@@ -462,6 +465,160 @@ function ContentTab() {
   )
 }
 
+function AchievementsTab() {
+  const [achievements, setAchievements] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editingType, setEditingType] = useState(null)
+  const [editForm, setEditForm] = useState({ name: '', description: '', icon: '', active: true })
+  const [showCreate, setShowCreate] = useState(false)
+  const [createForm, setCreateForm] = useState({ achievement_type: '', name: '', description: '', icon: '', active: true })
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.admin.listAchievements()
+      .then(setAchievements)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const startEdit = (ach) => {
+    setEditingType(ach.achievement_type)
+    setEditForm({ name: ach.name, description: ach.description || '', icon: ach.icon || '', active: ach.active })
+  }
+
+  const saveEdit = async (type) => {
+    await api.admin.updateAchievement(type, editForm)
+    setEditingType(null)
+    load()
+  }
+
+  const deleteAchievement = async (type) => {
+    if (!window.confirm('Tem certeza? Conquistas já desbloqueadas por usuários continuarão existindo.')) return
+    await api.admin.deleteAchievement(type)
+    load()
+  }
+
+  const createAchievement = async () => {
+    await api.admin.createAchievement(createForm)
+    setShowCreate(false)
+    setCreateForm({ achievement_type: '', name: '', description: '', icon: '', active: true })
+    load()
+  }
+
+  if (loading) return <div className="loading">Carregando...</div>
+
+  return (
+    <div className="admin-achievements">
+      <div className="admin-header-row">
+        <h2>Conquistas</h2>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Nova Conquista</button>
+      </div>
+
+      {showCreate && (
+        <div className="admin-form card">
+          <h3>Nova Conquista</h3>
+          <div className="form-group">
+            <label>Tipo</label>
+            <input value={createForm.achievement_type} onChange={e => setCreateForm(f => ({ ...f, achievement_type: e.target.value }))} placeholder="Ex: super_streak" />
+          </div>
+          <div className="form-group">
+            <label>Nome</label>
+            <input value={createForm.name} onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Super Sequência" />
+          </div>
+          <div className="form-group">
+            <label>Descrição</label>
+            <input value={createForm.description} onChange={e => setCreateForm(f => ({ ...f, description: e.target.value }))} placeholder="Ex: Estude por 60 dias seguidos" />
+          </div>
+          <div className="form-group">
+            <label>Ícone (emoji)</label>
+            <input value={createForm.icon} onChange={e => setCreateForm(f => ({ ...f, icon: e.target.value }))} placeholder="Ex: 🌟" />
+          </div>
+          <div className="form-group">
+            <label>
+              <input type="checkbox" checked={createForm.active} onChange={e => setCreateForm(f => ({ ...f, active: e.target.checked }))} />
+              {' '}Ativo
+            </label>
+          </div>
+          <div className="form-actions">
+            <button className="btn btn-primary" onClick={createAchievement}>Criar</button>
+            <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Ícone</th>
+            <th>Ativo</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {achievements.map(ach => (
+            <tr key={ach.achievement_type}>
+              <td><code>{ach.achievement_type}</code></td>
+              <td>
+                {editingType === ach.achievement_type ? (
+                  <input value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
+                ) : ach.name}
+              </td>
+              <td>
+                {editingType === ach.achievement_type ? (
+                  <input value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} />
+                ) : ach.description}
+              </td>
+              <td>
+                {editingType === ach.achievement_type ? (
+                  <input value={editForm.icon} onChange={e => setEditForm(f => ({ ...f, icon: e.target.value }))} placeholder="Emoji" />
+                ) : (
+                  <span style={{ fontSize: '1.5rem' }}>{ach.icon || '🏅'}</span>
+                )}
+              </td>
+              <td>
+                {editingType === ach.achievement_type ? (
+                  <label className="toggle-switch">
+                    <input type="checkbox" checked={editForm.active} onChange={e => setEditForm(f => ({ ...f, active: e.target.checked }))} />
+                    <span className="toggle-slider"></span>
+                  </label>
+                ) : (
+                  <div className="status-cell">
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={ach.active} readOnly />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    <span className={`status-badge ${ach.active ? 'active' : 'inactive'}`}>
+                      {ach.active ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+                )}
+              </td>
+              <td className="admin-actions">
+                {editingType === ach.achievement_type ? (
+                  <>
+                    <button className="btn btn-sm btn-primary" onClick={() => saveEdit(ach.achievement_type)}>Salvar</button>
+                    <button className="btn btn-sm btn-secondary" onClick={() => setEditingType(null)}>Cancelar</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btn-sm btn-ghost" onClick={() => startEdit(ach)}>Editar</button>
+                    <button className="btn btn-sm btn-danger" onClick={() => deleteAchievement(ach.achievement_type)}>Excluir</button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export default function Admin() {
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab') || 'flags'
@@ -481,11 +638,15 @@ export default function Admin() {
         <button className={`admin-tab ${tab === 'content' ? 'active' : ''}`} onClick={() => setTab('content')}>
           Conteúdo
         </button>
+        <button className={`admin-tab ${tab === 'achievements' ? 'active' : ''}`} onClick={() => setTab('achievements')}>
+          Conquistas
+        </button>
       </div>
       <div className="admin-tab-content">
         {tab === 'flags' && <FlagsTab />}
         {tab === 'modules' && <ModulesTab />}
         {tab === 'content' && <ContentTab />}
+        {tab === 'achievements' && <AchievementsTab />}
       </div>
     </div>
   )

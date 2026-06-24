@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import HelpButton from '../HelpButton/HelpButton'
 import './Layout.css'
 
@@ -8,6 +9,7 @@ export default function Layout({ children }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { isActive } = useFeatureFlags()
 
   const helpContext = location.pathname.includes('/lesson') ? 'lesson' :
     location.pathname.includes('/dashboard') ? 'dashboard' :
@@ -32,7 +34,7 @@ export default function Layout({ children }) {
             <nav className="nav">
               <Link to="/dashboard" className="nav-link" aria-label="Ir para o Início">🏠 Início</Link>
               <Link to="/profile" className="nav-link" aria-label="Ver Perfil">👤 Perfil</Link>
-              <Link to="/tutorial" className="nav-link" aria-label="Ajuda">❓ Ajuda</Link>
+              {isActive('feature_tutorial') && <Link to="/tutorial" className="nav-link" aria-label="Ajuda">❓ Ajuda</Link>}
               {user.is_admin && <Link to="/admin" className="nav-link" aria-label="Administração">⚙️ Admin</Link>}
               <div className="nav-user">
                 <span className="nav-xp">⭐ {user.xp} XP</span>

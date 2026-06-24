@@ -727,7 +727,7 @@ def get_emoji_for_syllable(syllable: str) -> str | None:
     key = syllable.upper()
     if key in SYLLABLE_EMOJI_MAP:
         return SYLLABLE_EMOJI_MAP[key]
-    return get_emoji_for_letter(key[0])
+    return None
 
 
 def get_emoji_for_text(text: str) -> str | None:

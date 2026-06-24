@@ -25,6 +25,7 @@ class Lesson(Base):
     active = Column(Boolean, default=True)
     image_url = Column(String(500), nullable=True)
     image_active = Column(Boolean, default=True)
+    image_policy = Column(String(20), nullable=False, default="auto")
     alt_text = Column(String(500), nullable=True)
     placeholder_text = Column(String(500), nullable=True)
     association_word = Column(String(100), nullable=True)

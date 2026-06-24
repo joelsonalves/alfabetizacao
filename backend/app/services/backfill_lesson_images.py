@@ -31,7 +31,10 @@ def resolve_association_for_lesson(lesson_type: str, target: str) -> str | None:
 
 def backfill_lesson_images(db: Session) -> int:
     count = 0
-    lessons = db.query(Lesson).filter(Lesson.image_url.is_(None)).all()
+    lessons = db.query(Lesson).filter(
+        Lesson.image_url.is_(None),
+        Lesson.image_policy == "auto",
+    ).all()
     for lesson in lessons:
         url = resolve_image_for_lesson(lesson.lesson_type, lesson.target)
         if url:
@@ -42,16 +45,16 @@ def backfill_lesson_images(db: Session) -> int:
 
 
 def backfill_lesson_images_force(db: Session) -> int:
-    """Recalcula image_url de TODAS as lições.
+    """Recalcula image_url de lições com image_policy='auto'.
 
-    Apenas lições cujo image_url difere do valor resolvido são atualizadas,
-    preservando edições manuais feitas via admin.
+    Preserva edições manuais (image_policy='custom') e lições sem imagem
+    (image_policy='none').
     """
     count = 0
-    lessons = db.query(Lesson).all()
+    lessons = db.query(Lesson).filter(Lesson.image_policy == "auto").all()
     for lesson in lessons:
         resolved = resolve_image_for_lesson(lesson.lesson_type, lesson.target)
-        if resolved and lesson.image_url != resolved:
+        if lesson.image_url != resolved:
             lesson.image_url = resolved
             count += 1
     db.commit()

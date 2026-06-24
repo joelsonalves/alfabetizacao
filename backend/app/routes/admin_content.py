@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.module import LearningModule, Lesson
-from app.schemas.module import ModuleResponse, ModuleCreate, ModuleUpdate, LessonResponse, LessonCreate, LessonUpdate
+from app.schemas.module import ModuleResponse, ModuleCreate, ModuleUpdate, LessonResponse, LessonCreate, LessonUpdate, VALID_IMAGE_POLICIES
 from app.routes.auth import require_admin
 from app.services.backfill_lesson_images import backfill_lesson_images
 
@@ -143,6 +143,8 @@ def list_lessons(module_id: int | None = None, module_type: str | None = None, a
 
 @router.post("/lessons", response_model=LessonResponse, status_code=201)
 def create_lesson(data: LessonCreate, _admin=Depends(require_admin), db: Session = Depends(get_db)):
+    if data.image_policy not in VALID_IMAGE_POLICIES:
+        raise HTTPException(status_code=400, detail=f"image_policy must be one of: {', '.join(sorted(VALID_IMAGE_POLICIES))}")
     lesson = Lesson(**data.model_dump())
     db.add(lesson)
     db.commit()
@@ -156,6 +158,8 @@ def update_lesson(lesson_id: int, data: LessonUpdate, _admin=Depends(require_adm
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
     update_data = data.model_dump(exclude_unset=True)
+    if "image_policy" in update_data and update_data["image_policy"] not in VALID_IMAGE_POLICIES:
+        raise HTTPException(status_code=400, detail=f"image_policy must be one of: {', '.join(sorted(VALID_IMAGE_POLICIES))}")
     for key, value in update_data.items():
         setattr(lesson, key, value)
     db.commit()

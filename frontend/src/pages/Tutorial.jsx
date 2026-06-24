@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useSpeech } from '../hooks/useSpeech'
+import { useFeatureFlags } from '../hooks/useFeatureFlags'
 import { api } from '../services/api'
 import './Tutorial.css'
 
@@ -54,10 +55,17 @@ export default function Tutorial() {
   const [step, setStep] = useState(0)
   const [show, setShow] = useState(true)
   const { user } = useAuth()
+  const { isActive } = useFeatureFlags()
   const navigate = useNavigate()
   const { speak, supported } = useSpeech()
 
   const currentStep = STEPS[step]
+
+  useEffect(() => {
+    if (!isActive('feature_tutorial')) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isActive, navigate])
 
   useEffect(() => {
     if (supported && currentStep) {

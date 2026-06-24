@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.routes import auth, modules, progress, images, admin, admin_content, feature_flags, config
+from app.routes import auth, modules, progress, images, admin, admin_content, feature_flags, config, achievements
 from app.services.auth import decode_access_token
 from app.services.cleanup import clean_expired_blocklist
 
@@ -41,6 +41,17 @@ _cleanup_task = None
 async def lifespan(_app: FastAPI):
     global _cleanup_task
     _cleanup_task = asyncio.create_task(clean_expired_blocklist())
+    try:
+        from app.database import SessionLocal
+        from app.models.achievement import AchievementDefinition
+        from app.services.seed_config import seed_achievement_definitions
+        db = SessionLocal()
+        count = db.query(AchievementDefinition).count()
+        if count == 0:
+            seed_achievement_definitions(db)
+        db.close()
+    except Exception:
+        pass
     yield
     if _cleanup_task:
         _cleanup_task.cancel()
@@ -101,6 +112,7 @@ app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(admin_content.router, prefix="/api/admin", tags=["admin_content"])
 app.include_router(feature_flags.router, prefix="/api/feature-flags", tags=["feature_flags"])
 app.include_router(config.router, prefix="/api", tags=["config"])
+app.include_router(achievements.router, prefix="/api", tags=["achievements"])
 
 
 @app.get("/api/health")
