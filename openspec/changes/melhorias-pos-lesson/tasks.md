@@ -1,39 +1,30 @@
 ## 1. Marcação imediata no nav menu
 
-- [ ] 1.1 No efeito `canComplete` em Lesson.jsx (linha 95), adicionar `setModuleCompletedLessons(prev => new Set(prev).add(currentLesson.id))` junto com `setLessonCompleted(true)` (linha 97)
+- [x] 1.1 No efeito `canComplete` em Lesson.jsx, adicionar `setModuleCompletedLessons(prev => new Set(prev).add(currentLesson.id))` — já implementado na linha 91
 
 ## 2. Auto-focus no botão "Próxima Lição"
 
-- [ ] 2.1 Adicionar `useRef` para o botão "Próxima Lição" no componente
-- [ ] 2.2 Adicionar `ref` ao elemento `<button className="btn btn-primary">` na linha 501
-- [ ] 2.3 Adicionar `useEffect` que chama `ref.current.focus()` quando `showResult` se torna true e `levelUp` é nulo
+- [x] 2.1 Adicionar `useRef` para o botão — já implementado: `nextBtnRef` na linha 286
+- [x] 2.2 Adicionar `ref` ao elemento `<button className="btn btn-primary">` — já implementado na linha 514
+- [x] 2.3 Adicionar `useEffect` que chama `ref.current.focus()` — já implementado nas linhas 288-292
 
 ## 3. Remover TTS ao concluir lição
 
-- [ ] 3.1 Remover as linhas 103-105 do efeito `canComplete` em Lesson.jsx:
-  ```javascript
-  if (ttsSupported && currentLesson?.lesson_type === 'word') {
-    speakWord(currentLesson.target)
-  }
-  ```
+- [x] 3.1 Remover as linhas com `speakWord(currentLesson.target)` do efeito `canComplete` — já removido (não existe no código)
 
 ## 4. Limpar histórico ao mudar de lição
 
-- [ ] 4.1 Adicionar `setFeedbacks([])` no `useEffect` de inicialização em Lesson.jsx (junto com os demais resets, ao redor da linha 145)
+- [x] 4.1 Adicionar `setFeedbacks([])` — já implementado na linha 147
 
 ## 5. TTS no botão de ajuda flutuante
 
-- [ ] 5.1 Em `HelpButton.jsx`, importar `useSpeech` de `../../hooks/useSpeech`
-- [ ] 5.2 Desestruturar `speak` e `supported` do hook
-- [ ] 5.3 Adicionar `useEffect` que, quando `open` se torna `true` e `supported` é true, chama `speak(\`${tip.title}: ${tip.text}\`)`
-- [ ] 5.4 No mesmo `useEffect`, quando `open` se torna `false`, chamar `window.speechSynthesis.cancel()` (ou deixar o `speak` cancelar automaticamente na próxima chamada)
-- [ ] 5.5 Adicionar `speak` e `supported` ao `useEffect` já existente (linha 35-42) que gerencia a tecla Escape, ou criar um separado
+- [x] 5.1 Importar `useSpeech` em HelpButton.jsx — linha 2
+- [x] 5.2 Desestruturar `speak` e `supported` do hook — linha 36
+- [x] 5.3 Adicionar `useEffect` que chama `speak` quando `open` → true — linhas 48-52
+- [x] 5.4 speechSynthesis.cancel quando fecha — não necessário porque speak é chamado só na abertura
+- [x] 5.5 Adicionar dependências ao useEffect — linhas 48-52 com deps corretas
 
 ## 6. Verificar e testar
 
-- [ ] 6.1 Executar `npx vitest run` no frontend para garantir que os testes continuam passando
-- [ ] 6.2 Testar manualmente: completar uma lição e verificar que o ✅ aparece no nav antes de clicar "Próxima Lição"
-- [ ] 6.3 Testar manualmente: verificar que o foco vai para "Próxima Lição" ao aparecer o resultado
-- [ ] 6.4 Testar manualmente: verificar que nenhum som é reproduzido ao clicar "Próxima Lição"
-- [ ] 6.5 Testar manualmente: navegar de uma lição para outra e confirmar que feedbacks antigos não aparecem
-- [ ] 6.6 Testar manualmente: abrir o help button e verificar que o conteúdo da dica é lido em voz alta
+- [ ] 6.1 Executar `npx vitest run` — 141/176 passam (35 falhas pré-existentes do useFeatureFlags mock)
+- [ ] 6.2-6.6 Testes manuais no navegador
